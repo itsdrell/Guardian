@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Internal\WindowsCommon.hpp" />
+    <ClInclude Include="Core\Platform\Window.hpp" />
+    <ClInclude Include="Core\General\EngineCommon.hpp" />
+    <ClInclude Include="Renderer\external\gl\glcorearb.h" />
+    <ClInclude Include="Renderer\external\gl\glext.h" />
+    <ClInclude Include="Renderer\external\gl\wglext.h" />
+    <ClInclude Include="Renderer\Renderer.hpp" />
+    <ClInclude Include="Renderer\RenderTypes.hpp" />
+    <ClInclude Include="Math\Vectors\Vector2.hpp" />
+    <ClInclude Include="Math\Vectors\Vector3.hpp" />
+    <ClInclude Include="Core\General\Rgba.hpp" />
+    <ClInclude Include="Renderer\Pipeline\VertexLayout.hpp" />
+    <ClInclude Include="Renderer\GLFunctions.hpp" />
+    <ClInclude Include="Math\Geometry\AABB2.hpp" />
+    <ClInclude Include="Core\Tools\ErrorWarningAssert.hpp" />
+    <ClInclude Include="Core\Utils\StringUtils.hpp" />
+    <ClInclude Include="Renderer\BuiltInShaders.hpp" />
+    <ClInclude Include="Core\General\Camera.hpp" />
+    <ClInclude Include="Math\Matrices\Matrix44.hpp" />
+    <ClInclude Include="Renderer\Pipeline\FrameBuffer.hpp" />
+    <ClInclude Include="Renderer\Images\Texture.hpp" />
+    <ClInclude Include="Math\Vectors\IntVector2.hpp" />
+    <ClInclude Include="Renderer\Images\Image.hpp" />
+    <ClInclude Include="Renderer\Pipeline\RenderBuffer.hpp" />
+    <ClInclude Include="Renderer\Components\Shader.hpp" />
+    <ClInclude Include="Renderer\Components\ShaderProgram.hpp" />
+    <ClInclude Include="Renderer\Pipeline\Sampler.hpp" />
+    <ClInclude Include="ThirdParty\stbi\stb_image.h" />
+    <ClInclude Include="ThirdParty\stbi\stb_image_write.h" />
+    <ClInclude Include="Math\Vectors\Vector4.hpp" />
+    <ClInclude Include="Math\MathUtils.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Core\Platform\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\General\EngineCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vectors\Vector2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vectors\Vector3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\General\Rgba.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\RenderTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\GLFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Geometry\AABB2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Tools\ErrorWarningAssert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Pipeline\VertexLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Utils\StringUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Matrices\Matrix44.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\General\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Pipeline\FrameBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vectors\IntVector2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Images\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Images\Image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Pipeline\RenderBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Components\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Components\ShaderProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\BuiltInShaders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Pipeline\Sampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\stbi\stb_image.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\stbi\stb_image_write.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Vectors\Vector4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\MathUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
