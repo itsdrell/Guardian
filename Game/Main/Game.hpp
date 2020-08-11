@@ -39,6 +39,20 @@ struct Vertex
 	Vector4	color; // normalized
 };
 
+struct SimpleVertex
+{
+	XMFLOAT3 Pos;
+	XMFLOAT4 Color;
+};
+
+
+struct ConstantBuffer
+{
+	XMMATRIX mWorld;
+	XMMATRIX mView;
+	XMMATRIX mProjection;
+};
+
 //====================================================================================
 // Classes
 //====================================================================================
@@ -67,12 +81,23 @@ private:
 	IDXGISwapChain1*        m_pSwapChainOne = nullptr;
 
 	ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
+	ID3D11DepthStencilView* m_depthStencilView = nullptr;
+	ID3D11Texture2D*        m_depthStencil = nullptr;
 
 	ID3D11VertexShader*		m_vertexShader = nullptr;
 	ID3D11PixelShader*		m_pixelShader = nullptr;
 
 	ID3D11InputLayout*		m_vertexLayout = nullptr;
 	ID3D11Buffer*			m_vertexBuffer = nullptr;
+	ID3D11Buffer*			m_indexBuffer = nullptr;
+
+	// constant buffer for transformations
+	ID3D11Buffer*			m_constantBuffer = nullptr;
+	XMMATRIX				m_bigCubeWorld;
+	XMMATRIX				m_smallCubeWorld;
+
+	XMMATRIX				m_view;
+	XMMATRIX				m_projection;
 						
 };
 

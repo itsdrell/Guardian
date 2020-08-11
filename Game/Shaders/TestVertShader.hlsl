@@ -10,10 +10,21 @@ struct VS_OUTPUT
 };
 
 //--------------------------------------------------------------------------------------
+cbuffer ConstantBuffer : register(b0)
+{
+	matrix World;
+	matrix View;
+	matrix Projection;
+}
+
+//--------------------------------------------------------------------------------------
 VS_OUTPUT main(float4 Pos : POSITION, float4 Color: COLOR)
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 	output.Pos = Pos;
+	output.Pos = mul(Pos, World); // object to world
+	output.Pos = mul(output.Pos, View); // world to view
+	output.Pos = mul(output.Pos, Projection); // view to projection
 	output.Color = Color;
 
 	return output;
