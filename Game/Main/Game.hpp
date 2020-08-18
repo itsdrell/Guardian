@@ -8,6 +8,7 @@
 
 #include "Engine/Math/Vectors/Vector3.hpp"
 #include "Engine/Math/Vectors/Vector4.hpp"
+#include "Engine/Math/Vectors/Vector2.hpp"
 
 using namespace DirectX;
 
@@ -31,12 +32,14 @@ using namespace DirectX;
 //====================================================================================
 struct Vertex
 {
-	Vertex(const Vector3& thePos, const Vector4& theColor)
+	Vertex(const Vector3& thePos, const Vector4& theColor, const Vector2& theUvs)
 		: pos(thePos)
-		, color(theColor) {}
+		, color(theColor) 
+		, uv(theUvs) {}
 
 	Vector3 pos;
 	Vector4	color; // normalized
+	Vector2 uv;
 };
 
 struct SimpleVertex
@@ -98,6 +101,11 @@ private:
 
 	XMMATRIX				m_view;
 	XMMATRIX				m_projection;
+
+	// texture stuff
+	ID3D11Texture2D*			m_testTexture = nullptr;
+	ID3D11ShaderResourceView*	m_testTextureView = nullptr;
+	ID3D11SamplerState*			m_testTextureSampler = nullptr; // linear
 						
 };
 

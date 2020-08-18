@@ -3,10 +3,19 @@
 // had to do this to get them to compile in VS
 // https://developercommunity.visualstudio.com/content/problem/356876/cant-create-new-hlsl-pixelvertexhull-shader-file.html
 //--------------------------------------------------------------------------------------
-struct VS_OUTPUT
+struct VS_INPUT
+{
+	float4 Pos : POSITION;
+	float4 Color: COLOR;
+	float2 Tex : TEXTURE_COORDS;
+};
+
+//--------------------------------------------------------------------------------------
+struct PS_INPUT
 {
 	float4 Pos : SV_POSITION;
-	float4 Color : COLOR0;
+	float4 Color: COLOR;
+	float2 Tex : TEXTURE_COORDS;
 };
 
 //--------------------------------------------------------------------------------------
@@ -18,14 +27,16 @@ cbuffer ConstantBuffer : register(b0)
 }
 
 //--------------------------------------------------------------------------------------
-VS_OUTPUT main(float4 Pos : POSITION, float4 Color: COLOR)
+PS_INPUT main(VS_INPUT input)
 {
-	VS_OUTPUT output = (VS_OUTPUT)0;
-	output.Pos = Pos;
-	output.Pos = mul(Pos, World); // object to world
-	output.Pos = mul(output.Pos, View); // world to view
-	output.Pos = mul(output.Pos, Projection); // view to projection
-	output.Color = Color;
+	PS_INPUT output = (PS_INPUT)0;
+	
+	output.Pos = mul(input.Pos, World);
+	output.Pos = mul(output.Pos, View);
+	output.Pos = mul(output.Pos, Projection);
+
+	output.Tex = input.Tex;
+	output.Color = input.Color;
 
 	return output;
 }

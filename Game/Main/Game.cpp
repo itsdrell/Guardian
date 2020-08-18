@@ -6,6 +6,10 @@
 #include <fstream>
 
 #include <directxmath.h>
+#include "Engine/Math/Vectors/Vector2.hpp"
+#include "Engine/ThirdParty/stbi/stb_image.h"
+
+static float depthPos = -4.5f;
 
 //===============================================================================================
 Game* g_theGame = nullptr;
@@ -203,6 +207,7 @@ void Game::StartUp()
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{ "TEXTURE_COORDS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
 	hr = m_deviceInterface->CreateInputLayout(layout, ARRAYSIZE(layout), vertexShaderBuffer, vertexShaderLength, &m_vertexLayout);
@@ -218,16 +223,49 @@ void Game::StartUp()
 
 	//-----------------------------------------------------------------------------------------------
 	// Create the vertex buffer
+	//Vertex vertices[] =
+	//{
+	//	Vertex(Vector3(-1.0f,  1.0f, -1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//	Vertex(Vector3(1.0f,  1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//	Vertex(Vector3(1.0f,  1.0f,  1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//	Vertex(Vector3(-1.0f,  1.0f,  1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//	Vertex(Vector3(-1.0f, -1.0f, -1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//	Vertex(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//	Vertex(Vector3(1.0f, -1.0f,  1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//	Vertex(Vector3(-1.0f, -1.0f,  1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
+	//};
+
 	Vertex vertices[] =
 	{
-		Vertex(Vector3(-1.0f,  1.0f, -1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f)),
-		Vertex(Vector3(1.0f,  1.0f, -1.0f),		Vector4(0.0f, 1.0f, 0.0f, 1.0f) ),
-		Vertex(Vector3(1.0f,  1.0f,  1.0f),		Vector4(0.0f, 1.0f, 1.0f, 1.0f) ),
-		Vertex(Vector3(-1.0f,  1.0f,  1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f)),
-		Vertex(Vector3(-1.0f, -1.0f, -1.0f),	Vector4(1.0f, 0.0f, 1.0f, 1.0f)),
-		Vertex(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 0.0f, 1.0f) ),
-		Vertex(Vector3(1.0f, -1.0f,  1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) ),
-		Vertex(Vector3(-1.0f, -1.0f,  1.0f),	Vector4(0.0f, 0.0f, 0.0f, 1.0f)),
+		Vertex(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+		Vertex(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+		Vertex(Vector3(1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+		Vertex(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+												
+		Vertex(Vector3(-1.0f, -1.0f, -1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+		Vertex(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+		Vertex(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+		Vertex(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+
+		Vertex(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+		Vertex(Vector3(-1.0f, -1.0f, -1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+		Vertex(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+		Vertex(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+
+		Vertex(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+		Vertex(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+		Vertex(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+		Vertex(Vector3(1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+
+		Vertex(Vector3(-1.0f, -1.0f, -1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+		Vertex(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+		Vertex(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+		Vertex(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+
+		Vertex(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+		Vertex(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+		Vertex(Vector3(1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+		Vertex(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
 	};
 
 	D3D11_BUFFER_DESC bufferDescription = {};
@@ -256,20 +294,20 @@ void Game::StartUp()
 		3,1,0,
 		2,1,3,
 
-		0,5,4,
-		1,5,0,
-
-		3,4,7,
-		0,4,3,
-
-		1,6,5,
-		2,6,1,
-
-		2,7,6,
-		3,7,2,
-
 		6,4,5,
 		7,4,6,
+
+		11,9,8,
+		10,9,11,
+
+		14,12,13,
+		15,12,14,
+
+		19,17,16,
+		18,17,19,
+
+		22,20,21,
+		23,20,22
 	};
 
 	D3D11_BUFFER_DESC indexBufferDescription = {};
@@ -309,6 +347,65 @@ void Game::StartUp()
 	// Initialize the projection matrix
 	m_projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, theWindow->GetAspect(), 0.01f, 100.0f);
 
+
+	//-----------------------------------------------------------------------------------------------
+	// Texture stuff :l 
+	int textureDimensionX = 0;
+	int textureDimensionY = 0;
+	int numberOfComponents = 0;
+	int numberOfComponentsRequested = 0;
+
+	// Get the buffer using stbi
+	// Load (and decompress) the image RGB(A) bytes from a file on disk, and create an OpenGL texture instance from it
+	unsigned char* imageData = stbi_load("Data/Images/Test_StbiAndDirectX.png", &textureDimensionX, &textureDimensionY, &numberOfComponents, numberOfComponentsRequested);
+
+	// Create the texture resource (https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-textures-create)
+	// https://www.rastertek.com/dx11s2tut05.html
+	// This is creating a default texture we are going to fill with data
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Width = textureDimensionX;
+	textureDesc.Height = textureDimensionY;
+	textureDesc.ArraySize = 1;
+	textureDesc.MipLevels = 0; 
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
+	hr = m_deviceInterface->CreateTexture2D(&textureDesc, NULL, &m_testTexture);
+	m_deviceImmediateContext->UpdateSubresource(m_testTexture, 0, NULL, imageData, (textureDesc.Width * 4) * sizeof(unsigned char), 0);
+
+	// Create the Shader Resource View for the texture
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
+	shaderResourceViewDesc.Format = textureDesc.Format;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = -1;
+
+	hr = m_deviceInterface->CreateShaderResourceView(m_testTexture, &shaderResourceViewDesc, &m_testTextureView);
+	m_deviceImmediateContext->GenerateMips(m_testTextureView);
+
+	// Create the sampler description
+	D3D11_SAMPLER_DESC sampleDescription = {};
+	sampleDescription.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampleDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampleDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampleDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampleDescription.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampleDescription.MinLOD = 0;
+	sampleDescription.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the sampler
+	hr = m_deviceInterface->CreateSamplerState(&sampleDescription, &m_testTextureSampler);
+
+	// Bind both sampler and texture to shader
+	m_deviceImmediateContext->PSSetShaderResources(0, 1, &m_testTextureView);
+	m_deviceImmediateContext->PSSetSamplers(0, 1, &m_testTextureSampler);
+
+	stbi_image_free(imageData);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -323,11 +420,12 @@ void Game::Update(float ds)
 	
 	m_bigCubeWorld = XMMatrixRotationY(t);
 
+	depthPos += (.005);
 
 	// 2nd Cube:  Rotate around origin
-	XMMATRIX mSpin = XMMatrixRotationZ(-t);
-	XMMATRIX mOrbit = XMMatrixRotationY(-t * 2.0f);
-	XMMATRIX mTranslate = XMMatrixTranslation(-4.0f, 0.0f, 0.0f);
+	XMMATRIX mSpin = XMMatrixRotationZ(-t); //t
+	XMMATRIX mOrbit = XMMatrixRotationY(-t * 2.0f); //-t * 2.0f
+	XMMATRIX mTranslate = XMMatrixTranslation(0.0f, 1.0f, depthPos);
 	XMMATRIX mScale = XMMatrixScaling(0.3f, 0.3f, 0.3f);
 	m_smallCubeWorld = mScale * mSpin * mTranslate * mOrbit;
 }
@@ -367,7 +465,7 @@ void Game::Render() const
 	
 	m_deviceImmediateContext->UpdateSubresource(m_constantBuffer, 0, NULL, &cb2, 0, 0);
 
-	m_deviceImmediateContext->DrawIndexed(36, 0, 0);
+	//m_deviceImmediateContext->DrawIndexed(36, 0, 0);
 															
 															
 	//uint stride = sizeof(Vertex);

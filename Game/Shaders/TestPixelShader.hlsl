@@ -1,14 +1,27 @@
 //--------------------------------------------------------------------------------------
 // Pixel Shader
 //--------------------------------------------------------------------------------------
-struct VS_OUTPUT
+Texture2D txDiffuse : register(t0);
+SamplerState samLinear : register(s0);
+
+//--------------------------------------------------------------------------------------
+struct VS_INPUT
 {
-	float4 Pos : SV_POSITION;
-	float4 Color : COLOR0;
+	float4 Pos : POSITION;
+	float4 Color: COLOR;
+	float2 Tex : TEXTURE_COORDS;
 };
 
 //--------------------------------------------------------------------------------------
-float4 main(VS_OUTPUT input) : SV_Target
+struct PS_INPUT
 {
-	return input.Color;
+	float4 Pos : SV_POSITION;
+	float4 Color: COLOR;
+	float2 Tex : TEXTURE_COORDS;
+};
+
+//--------------------------------------------------------------------------------------
+float4 main(PS_INPUT input) : SV_Target
+{
+	return txDiffuse.Sample(samLinear, input.Tex) * input.Color;
 }
