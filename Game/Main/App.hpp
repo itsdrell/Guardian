@@ -34,7 +34,6 @@ public:
 	void RunFrame();
 	void Update();
 	void Render() const;
-	void RenderTriangle() const;
 
 public:
 	bool m_isQuitting = false;

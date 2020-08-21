@@ -54,7 +54,7 @@ bool AppMessageHandler(unsigned int msg, size_t wparam, size_t lparam)
 }
 
 //-----------------------------------------------------------------------------------------------
-void CreateOpenGLWindow( HINSTANCE applicationInstanceHandle, float clientAspect )
+void CreateAppWindow( HINSTANCE applicationInstanceHandle, float clientAspect )
 {
 	Window* newWindow = new Window("Guardian", clientAspect);
 	newWindow->RegisterHandler( AppMessageHandler );
@@ -94,7 +94,7 @@ void RunFrame()
 //-----------------------------------------------------------------------------------------------
 void Initialize( HINSTANCE applicationInstanceHandle )
 {
-	CreateOpenGLWindow( applicationInstanceHandle, CLIENT_ASPECT );
+	CreateAppWindow( applicationInstanceHandle, CLIENT_ASPECT );
 	g_theApp = new App();	
 	g_theApp->Startup();
 }

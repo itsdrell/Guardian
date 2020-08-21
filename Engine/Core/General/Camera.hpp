@@ -1,6 +1,5 @@
 #pragma once
 #include "Engine/Math/Matrices/Matrix44.hpp"
-#include "Engine/Renderer/Pipeline/FrameBuffer.hpp"
 #include "Engine/Core/General/EngineCommon.hpp"
 
 //====================================================================================
@@ -35,12 +34,12 @@ public:
 	~Camera();
 
 public:
-	void SetColorTarget( Texture* colorTarget ) { m_output.SetColorTarget(colorTarget); }
+	//void SetColorTarget( Texture* colorTarget ) { m_output.SetColorTarget(colorTarget); }
 	void SetProjectionOrthoByAspect( float height, float theNear = -10.f, float theFar = 100.f );
 
 public:
-	FrameBuffer GetFramebuffer() { return m_output; }
-	uint GetFrameBufferID() { return m_output.m_ID; }
+	//FrameBuffer GetFramebuffer() { return m_output; }
+	//uint GetFrameBufferID() { return m_output.m_ID; }
 
 public:
 	Matrix44		m_cameraMatrix; // where is the camera in the world
@@ -48,7 +47,7 @@ public:
 	Matrix44		m_projectionMatrix;
 
 public:
-	FrameBuffer		m_output;
+	//FrameBuffer		m_output;
 	Vector2			m_orthoDimensions;
 
 };

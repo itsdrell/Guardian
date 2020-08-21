@@ -1,568 +1,192 @@
 #include "Renderer.hpp"
-#include "Engine/Core/Tools/ErrorWarningAssert.hpp"
-#include "Engine/Renderer/GLFunctions.hpp"
-#include "Engine/Renderer/RenderTypes.hpp"
-#include "Engine/Core/General/Rgba.hpp"
-#include "Engine/Core/General/Camera.hpp"
-#include "Engine/Renderer/Components/Shader.hpp"
-#include "Engine/Renderer/Components/ShaderProgram.hpp"
-#include "Engine/Core/Platform/Window.hpp"
-#include "Engine/Renderer/Images/Image.hpp"
-#include "Engine/Renderer/Images/Texture.hpp"
-#include "Engine/Renderer/BuiltInShaders.hpp"
-#include "Engine/Renderer/Pipeline/Sampler.hpp"
-#include "Engine/Renderer/Pipeline/FrameBuffer.hpp"
 #include "Engine/Core/Platform/Window.hpp"
 
+#define WIN32_LEAN_AND_MEAN 
+#include <windows.h>
+#include <d3d11_1.h>
+#include <directxcolors.h>
 
 //===============================================================================================
-// Four needed variables for RenderStartup.
-//static HMODULE gGLLibrary  = NULL; 
-HMODULE gGLLibrary  = NULL;				// this is externed in GLFunctions
-static HWND gGLwnd         = NULL;    // window our context is attached to; 
-static HDC gHDC            = NULL;    // our device context
-static HGLRC gGLContext    = NULL;    // our rendering context; 
-
-// these need to be declared here for linking!
-static HGLRC CreateOldRenderContext( HDC hdc );
-static HGLRC CreateRealRenderContext( HDC hdc, int major, int minor );
-
-//-----------------------------------------------------------------------------------------------
-int g_openGlPrimitiveTypes[ NUM_PRIMITIVE_TYPES ] =
-{
-
-	GL_POINTS,			// called PRIMITIVE_POINTS		in our engine
-	GL_LINES,			// called PRIMITIVE_LINES		in our engine
-	GL_TRIANGLES,		// called PRIMITIVE_TRIANGES	in our engine
-						//GL_POLYGON,			// called PRIMITIVE_POLYGON
-						//GL_QUADS			// called PRIMITIVE_QUADS		in our engine
-};
-
-//-----------------------------------------------------------------------------------------------
-Renderer* Renderer::s_theRenderer = nullptr;
+Renderer* Renderer::s_renderer = nullptr;
 
 //===============================================================================================
 Renderer::Renderer()
 {
-	s_theRenderer = this;
-
-	RenderStartup((HWND) Window::GetInstance()->GetHandle());
+	s_renderer = this;
 }
 
 //-----------------------------------------------------------------------------------------------
 Renderer::~Renderer()
 {
-	GLShutdown();
+	if (m_deviceImmediateContext) m_deviceImmediateContext->ClearState();
+	
+	if (m_deviceImmediateContext) m_deviceImmediateContext->Release();
+	if (m_deviceImmediateContextOne) m_deviceImmediateContextOne->Release();
+	if (m_deviceInterface) m_deviceInterface->Release();
+	if (m_deviceInterfaceOne) m_deviceInterfaceOne->Release();
+	if (m_swapChain) m_swapChain->Release();
+	if (m_swapChainOne) m_swapChainOne->Release();
+	if (m_renderTargetView) m_renderTargetView->Release();
+	if (m_depthStencil) m_depthStencil->Release();
+	if (m_depthStencilView) m_depthStencilView->Release();
 }
 
 //-----------------------------------------------------------------------------------------------
-void Renderer::RenderStartup(void* hwnd)
+void Renderer::Startup()
 {
-	// load and get a handle to the opengl dll (dynamic link library)
-	gGLLibrary = ::LoadLibraryA( "opengl32.dll" ); 
+	HRESULT hr = S_OK;
+	Window* theWindow = Window::GetInstance();
+	uint windowWidth = (uint) theWindow->GetWidth();
+	uint windowHeight = (uint) theWindow->GetHeight();
 
-	// Get the Device Context (DC) - how windows handles the interface to rendering devices
-	// This "acquires" the resource - to cleanup, you must have a ReleaseDC(hwnd, hdc) call. 
-	HDC hdc = ::GetDC( (HWND) hwnd );       
+	// Creating the device and device context
+	D3D11CreateDevice(
+		nullptr,
+		D3D_DRIVER_TYPE_HARDWARE,
+		nullptr,
+		0,
+		nullptr,
+		0,
+		D3D11_SDK_VERSION,
+		&m_deviceInterface,
+		nullptr,
+		&m_deviceImmediateContext);
 
-	// use the DC to create a rendering context (handle for all OpenGL state - like a pointer)
-	// This should be very similar to SD1
-	HGLRC temp_context = CreateOldRenderContext( hdc ); 
+	// We need to get the device factory
+	IDXGIFactory1* dxgiFactory = nullptr;
+	IDXGIDevice* dxgiDevice = nullptr;
 
-	::wglMakeCurrent( hdc, temp_context ); 
-	BindNewGLFunctions();  // find the functions we'll need to create the real context; 
+	// converting our deviceinterface1 into the IDXGIDevice
+	hr = m_deviceInterface->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&dxgiDevice));
+	if (SUCCEEDED(hr))
+	{
+		IDXGIAdapter* adapter = nullptr; // basically a virtual rep of the video card
+		hr = dxgiDevice->GetAdapter(&adapter); // we gotta get the adapter we created with CreateDevice
+		if (SUCCEEDED(hr))
+		{
+			hr = adapter->GetParent(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&dxgiFactory));
+			adapter->Release();
+		}
+		dxgiDevice->Release();
+	}
 
-	// create the real context, using opengl version 4.2
-	HGLRC real_context = CreateRealRenderContext( hdc, 2, 0 ); 
+	// swap chain time
+	IDXGIFactory2* dxgiFactory2 = nullptr;
+	hr = dxgiFactory->QueryInterface(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(&dxgiFactory2));
+	if (dxgiFactory2)
+	{
+		// We got a factory thats for version 11.1 or later so lets use that to create the chain buffer
+		hr = m_deviceInterface->QueryInterface(__uuidof(ID3D11Device1), reinterpret_cast<void**>(&m_deviceInterfaceOne));
+		if (SUCCEEDED(hr))
+		{
+			(void)m_deviceImmediateContext->QueryInterface(__uuidof(ID3D11DeviceContext1), reinterpret_cast<void**>(&m_deviceImmediateContextOne));
+		}
 
-	// Set and cleanup
-	::wglMakeCurrent( hdc, real_context ); 
-	::wglDeleteContext( temp_context ); 
+		DXGI_SWAP_CHAIN_DESC1 sd = {};
+		// I am pretty sure you could make these 0 and they would take the active window size
+		sd.Width = windowWidth;
+		sd.Height = windowHeight;
+		sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		sd.SampleDesc.Count = 1;
+		sd.SampleDesc.Quality = 0;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.BufferCount = 1;
 
-	// Bind all our OpenGL functions we'll be using.
-	BindGLFunctions(); 
+		hr = dxgiFactory2->CreateSwapChainForHwnd(m_deviceInterface, (HWND)theWindow->GetHandle(), &sd, nullptr, nullptr, &m_swapChainOne);
+		if (SUCCEEDED(hr))
+		{
+			hr = m_swapChainOne->QueryInterface(__uuidof(IDXGISwapChain), reinterpret_cast<void**>(&m_swapChain));
+		}
 
-	// set the globals
-	gGLwnd = (HWND) hwnd;
-	gHDC = hdc; 
-	gGLContext = real_context; 
+		dxgiFactory2->Release();
+	}
+	else
+	{
+		// we got a dx11.0 system
+		DXGI_SWAP_CHAIN_DESC sd = {};
+		sd.BufferCount = 1;
+		sd.BufferDesc.Width = windowWidth;
+		sd.BufferDesc.Height = windowHeight;
+		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		sd.BufferDesc.RefreshRate.Numerator = 60;
+		sd.BufferDesc.RefreshRate.Denominator = 1;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.OutputWindow = (HWND)theWindow->GetHandle();
+		sd.SampleDesc.Count = 1;
+		sd.SampleDesc.Quality = 0;
+		sd.Windowed = TRUE;
 
-	RenderPostStartUp();
+		hr = dxgiFactory->CreateSwapChain(m_deviceInterface, &sd, &m_swapChain);
+	}
 
-	//return true; 
+	dxgiFactory->Release();
 
+	// Render target time
+	ID3D11Texture2D* pBackBuffer = nullptr;
+	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBackBuffer));
+
+	hr = m_deviceInterface->CreateRenderTargetView(pBackBuffer, nullptr, &m_renderTargetView);
+	pBackBuffer->Release();
+
+	// depth buffers
+	D3D11_TEXTURE2D_DESC depthDesc = {};
+	depthDesc.Width = windowWidth;
+	depthDesc.Height = windowHeight;
+	depthDesc.MipLevels = 1;
+	depthDesc.ArraySize = 1;
+	depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthDesc.SampleDesc.Count = 1;
+	depthDesc.SampleDesc.Quality = 0;
+	depthDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthDesc.CPUAccessFlags = 0;
+	depthDesc.MiscFlags = 0;
+
+	hr = m_deviceInterface->CreateTexture2D(&depthDesc, nullptr, &m_depthStencil);
+
+	// depth target view
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+	depthStencilViewDesc.Format = depthDesc.Format;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	hr = m_deviceInterface->CreateDepthStencilView(m_depthStencil, &depthStencilViewDesc, &m_depthStencilView);
+
+	// set both the rendertarget and depth buffer
+	m_deviceImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+
+	// Setup the viewport
+	D3D11_VIEWPORT vp;
+	vp.Width = (FLOAT)theWindow->GetWidth();
+	vp.Height = (FLOAT)theWindow->GetHeight();
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	m_deviceImmediateContext->RSSetViewports(1, &vp);
 }
 
 //-----------------------------------------------------------------------------------------------
-void Renderer::RenderPostStartUp()
+void Renderer::PostStartup()
 {
-	//BuiltInShaders::CreateAllBuiltInShaders();
-
-	// Turn off VSync
-	wglSwapIntervalEXT( 0 ); 
-
-	// default_vao is a GLuint member variable
-	glGenVertexArrays( 1, &m_defaultVAO ); 
-	glBindVertexArray( m_defaultVAO );  
-
-	m_immediateBuffer = new RenderBuffer();
-
-	m_defaultSampler = new Sampler();
-	m_defaultSampler->CreateDefault();
-	m_currentSampler = m_defaultSampler;
-
-	// default white texture
-	m_defaultTexture = new Texture(); //CreateOrGetTexture("Data/Images/defaultTexture.png");
-	m_defaultTexture =  m_defaultTexture->CreateFromImage(Image("defaultTexture", IntVector2(8,8), Rgba(255, 255, 255, 255)));
-	m_currentTexture = m_defaultTexture;
-
-	// default font 
-	//m_defaultFont = CreateOrGetBitmapFont("SquirrelFixedFont");
-
-	//m_defaultShader = Shader::CreateOrGetShader("default");
-	m_defaultShader = BuiltInShaders::CreateDefaultShader();
-	m_currentShader = m_defaultShader;
-
-	// Frame buffer stuff
-	// the default color and depth should match our output window
-	// so get width/height however you need to.
-	int window_width =  (int)Window::GetInstance()->GetWidth(); 
-	int window_height = (int)Window::GetInstance()->GetHeight();
-
-	// create our output textures
-	m_defaultColorTarget = CreateRenderTarget( window_width, 
-		window_height );
-	m_defaultDepthTarget = CreateRenderTarget( window_width, 
-		window_height, 
-		TEXTURE_FORMAT_D24S8 ); 
-
-	// setup the initial camera
-	m_defaultCamera = new Camera();
-	m_defaultCamera->SetColorTarget( m_defaultColorTarget ); 
-	//m_defaultCamera->SetDepthStencilTarget( m_defaultDepthTarget ); 
-
-	// set our default camera to be our current camera
-	SetCamera(nullptr); 
 
 }
 
 //-----------------------------------------------------------------------------------------------
 void Renderer::BeginFrame()
 {
-	GL_CHECK_ERROR();
-	ClearScreen(Rgba(0,0,0,0));
+	// this might be needed to go first once we do more complicated things
+	//m_deviceImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, nullptr);
+	float color[4] = { 210.f / 255.f, 74.f / 255.f, 97.f / 255.f, 1.0f };
+
+	m_deviceImmediateContext->ClearRenderTargetView(m_renderTargetView, color);
+	m_deviceImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 //-----------------------------------------------------------------------------------------------
 void Renderer::EndFrame()
 {
-	GL_CHECK_ERROR();
-	FrameBuffer temp = m_defaultCamera->GetFramebuffer();
-	CopyFrameBuffer( nullptr, &temp ); 
-
-	HWND hWnd = GetActiveWindow();
-	HDC hDC = GetDC( hWnd );
-	SwapBuffers( hDC );
+	m_swapChain->Present(0, 0);
 }
 
-//-----------------------------------------------------------------------------------------------
-bool Renderer::CopyFrameBuffer(FrameBuffer* dst, FrameBuffer* src)
-{
-	GL_CHECK_ERROR();
 
-	// we need at least the src.
-	if (src == nullptr) {
-		return false; 
-	}
-
-	// Get the handles - NULL refers to the "default" or back buffer FBO
-	GLuint src_fbo = src->GetID();
-	GLuint dst_fbo = NULL; 
-	if (dst != nullptr) {
-		dst_fbo = dst->GetID(); 
-	}
-
-	// can't copy onto ourselves
-	if (dst_fbo == src_fbo) {
-		return false; 
-	}
-
-	// the GL_READ_FRAMEBUFFER is where we copy from
-	glBindFramebuffer( GL_READ_FRAMEBUFFER, src_fbo );						GL_CHECK_ERROR();
-
-	// what are we copying to?
-	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, dst_fbo );						GL_CHECK_ERROR();
-
-	// blit it over - get the size
-	// (we'll assume dst matches for now - but to be safe,
-	// you should get dst_width and dst_height using either
-	// dst or the window depending if dst was nullptr or not
-	int width = 0;
-	int height = 0;
-
-	if(src->m_depthStencilTarget != nullptr)
-	{
-		width = src->GetDepthStencilTargetWidth();     
-		height = src->GetDepthStencilTargetHeight(); 
-	}
-	else
-	{
-		Window* theWindow = Window::GetInstance();
-
-		// might want to make em floats but w/e
-		width = (int)theWindow->GetWidth();
-		height = (int)theWindow->GetHeight();
-	}
-
-	// Copy it over
-	glBlitFramebuffer( 0, 0, // src start pixel
-		width, height,        // src size
-		0, 0,                 // dst start pixel
-		width, height,        // dst size
-		GL_COLOR_BUFFER_BIT,  // what are we copying (just colour)
-		GL_NEAREST );         // resize filtering rule (in case src/dst don't match)
-
-							  // Make sure it succeeded
-	GL_CHECK_ERROR(); 
-
-	// cleanup after ourselves
-	glBindFramebuffer( GL_READ_FRAMEBUFFER, NULL );						GL_CHECK_ERROR();
-	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, NULL );						GL_CHECK_ERROR();
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::ClearScreen(const Rgba & clearColor)
-{
-	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::SetCamera(Camera* theCamera /*= nullptr */)
-{
-	GL_CHECK_ERROR();
-
-	if (theCamera == nullptr) {
-		theCamera = m_defaultCamera; 
-	}
-
-	theCamera->m_output.Finalize(); // make sure the framebuffer is finished being setup; 
-
-	m_currentCamera = theCamera;
-
-	BindCameraToShader(*m_currentCamera);
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::BindCameraToShader(const Camera& theCamera)
-{
-	GL_CHECK_ERROR();
-
-	// Set the variables so that we can use them in the uniform shader
-	m_cameraMatrixData.view = theCamera.m_viewMatrix;
-	m_cameraMatrixData.projection = theCamera.m_projectionMatrix;
-
-	//TODO("viewProjection was breaking stuff pls fix");
-	m_cameraMatrixData.viewProjection = Matrix44(); 
-
-	// inverses
-	//m_cameraMatrixData.inverseView = theCamera.m_cameraMatrix;
-	//m_cameraMatrixData.inverseProjection = Invert(m_cameraMatrixData.projection);
-	//m_cameraMatrixData.inverseViewProjection = Invert(m_cameraMatrixData.inverseViewProjection);
-
-	m_modelMatrixData.model = theCamera.m_cameraMatrix;
-
-	// bind to the shader
-	m_cameraMatrixBuffer.CopyToGPU(sizeof(m_cameraMatrixData), &m_cameraMatrixData);
-	glBindBufferBase(GL_UNIFORM_BUFFER, CAMERA_BUFFER_BINDING, m_cameraMatrixBuffer.m_handle);			GL_CHECK_ERROR();
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::SetShader(Shader* shader /*= nullptr */)
-{
-	GL_CHECK_ERROR();
-
-	// Be sure to that this eventually does call glUseProgram,
-	// as all your SetUniform* calls requires it 
-
-	if(nullptr == shader)
-	{
-		shader = m_defaultShader;
-	}
-
-	m_currentShader = shader;
-
-	glUseProgram(m_currentShader->m_program->m_programHandle);					GL_CHECK_ERROR();
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::SetCurrentTexture(int bindIndex /*= 0*/, Texture* texture /*= nullptr*/)
-{
-	GL_CHECK_ERROR();
-
-	if(texture == nullptr)
-	{
-		texture = m_defaultTexture;
-	}
-
-	m_currentTexture = texture;
-
-	// Bind the texture
-	glActiveTexture( GL_TEXTURE0 + bindIndex );						GL_CHECK_ERROR();
-
-	glBindTexture( GL_TEXTURE_2D, m_currentTexture->GetID() );		GL_CHECK_ERROR();
-}
-
-//-----------------------------------------------------------------------------------------------
-Texture* Renderer::CreateRenderTarget(int width, int height, eTextureFormat format)
-{
-	Texture *tex = new Texture();
-	tex->CreateRenderTarget( width, height, format );
-
-	return tex;
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::DrawAABB2(const AABB2 & bounds, const Rgba & color, bool filled)
-{
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::DrawMeshImmediate(PrimitiveType primitiveType, Vertex3D_PCU* vertices, int numOfVertices)
-{
-	GL_CHECK_ERROR();
-
-	// first, copy the memory to the buffer
-	m_immediateBuffer->CopyToGPU( sizeof(Vertex3D_PCU) * numOfVertices, vertices ); 
-
-	// Tell GL what shader program to use.
-	GLuint program_handle = m_currentShader->m_program->m_programHandle; 
-
-
-	// Bind the Position
-	GLint pos_bind = glGetAttribLocation(program_handle, "POSITION");		GL_CHECK_ERROR();
-
-	// Next, bind the buffer we want to use; 
-	glBindBuffer( GL_ARRAY_BUFFER, m_immediateBuffer->m_handle );				GL_CHECK_ERROR();
-
-	// next, bind where position is in our buffer to that location; 
-	if (pos_bind >= 0) {
-		// enable this location
-		glEnableVertexAttribArray(pos_bind);								GL_CHECK_ERROR();
-
-		// describe the data
-		glVertexAttribPointer(pos_bind, // where?
-			3,                           // how many (vec3 has 3 floats)
-			GL_FLOAT,                    // type? (vec3 is 3 floats)
-			GL_FALSE,                    // Should data be normalized
-			sizeof(Vertex3D_PCU),              // stride (how far between each vertex)
-			(GLvoid*)offsetof(Vertex3D_PCU, m_position)); // From the start of a vertex, where is this data?
-	}
-	GL_CHECK_ERROR();
-
-	// Now that it is described and bound, draw using our program
-	glUseProgram( program_handle );											GL_CHECK_ERROR(); 
-
-	// Bind the UV
-	GLint uv_bind = glGetAttribLocation(program_handle, "UV");				GL_CHECK_ERROR();
-
-	// Next, bind the buffer we want to use; 
-	glBindBuffer( GL_ARRAY_BUFFER, m_immediateBuffer->m_handle );				GL_CHECK_ERROR();
-
-	// next, bind where position is in our buffer to that location; 
-	if (uv_bind >= 0) {
-		// enable this location
-		glEnableVertexAttribArray(uv_bind);									GL_CHECK_ERROR();
-
-		// describe the data
-		glVertexAttribPointer(uv_bind, // where?
-			2,										// how many (vec2 has 2 floats)
-			GL_FLOAT,								// type? (vec2 is 2 floats)
-			GL_FALSE,								// Should data be normalized
-			sizeof(Vertex3D_PCU),					// stride (how far between each vertex)
-			(GLvoid*)offsetof(Vertex3D_PCU, m_uvTexCoords)); // From the start of a vertex, where is this data?
-	}
-	GL_CHECK_ERROR();
-
-	// binding frame buffer
-	glBindFramebuffer( GL_FRAMEBUFFER, 
-		m_currentCamera->GetFrameBufferID() );								GL_CHECK_ERROR();
-
-	// Now that it is described and bound, draw using our program
-	glUseProgram( program_handle ); 										GL_CHECK_ERROR();
-
-	// Next, bind the buffer we want to use;
-	glBindBuffer( GL_ARRAY_BUFFER, m_immediateBuffer->m_handle );				GL_CHECK_ERROR();
-
-	// next, bind where position is in our buffer to that location;
-	GLint bind = glGetAttribLocation(program_handle, "COLOR");				GL_CHECK_ERROR();
-	if (bind >= 0) {
-		// enable this location
-		glEnableVertexAttribArray(bind);									GL_CHECK_ERROR();
-
-		// describe the data
-		glVertexAttribPointer(bind, // where?
-			4,                           // how many (RGBA is 4 unsigned chars)
-			GL_UNSIGNED_BYTE,            // type? (RGBA is 4 unsigned chars)
-			GL_TRUE,                     // Normalize components, maps 0-255 to 0-1.
-			sizeof(Vertex3D_PCU),              // stride (how far between each vertex)
-			(GLvoid*)offsetof(Vertex3D_PCU, m_color)); // From the start of a vertex, where is this data?
-	}
-	GL_CHECK_ERROR();
-
-
-	GLenum glPrimitiveType = g_openGlPrimitiveTypes[ primitiveType ];
-	glDrawArrays(glPrimitiveType, 0, numOfVertices );							GL_CHECK_ERROR();
-
-}
-
-//-----------------------------------------------------------------------------------------------
-void Renderer::DrawMeshImmediate(PrimitiveType thePrimitive, uint vertexCount, Vertex3D_PCU * vertices, uint indicesCount, uint * indices)
-{
-}
-
-//-----------------------------------------------------------------------------------------------
-Renderer * Renderer::GetInstance()
-{
-	return s_theRenderer;
-}
-
-//-----------------------------------------------------------------------------------------------
-void* Renderer::GetGLLibrary()
-{
-	return gGLLibrary;
-}
-
-//===============================================================================================
-// Creates a real context as a specific version (major.minor)
-static HGLRC CreateRealRenderContext( HDC hdc, int major, int minor ) 
-{
-	// So similar to creating the temp one - we want to define 
-	// the style of surface we want to draw to.  But now, to support
-	// extensions, it takes key_value pairs
-	int const format_attribs[] = {
-		WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,    // The rc will be used to draw to a window
-		WGL_SUPPORT_OPENGL_ARB, GL_TRUE,    // ...can be drawn to by GL
-		WGL_DOUBLE_BUFFER_ARB, GL_TRUE,     // ...is double buffered
-		WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB, // ...uses a RGBA texture
-		WGL_COLOR_BITS_ARB, 24,             // 24 bits for color (8 bits per channel)
-											// WGL_DEPTH_BITS_ARB, 24,          // if you wanted depth a default depth buffer...
-											// WGL_STENCIL_BITS_ARB, 8,         // ...you could set these to get a 24/8 Depth/Stencil.
-											NULL, NULL,                         // Tell it we're done.
-	};
-
-	// Given the above criteria, we're going to search for formats
-	// our device supports that give us it.  I'm allowing 128 max returns (which is overkill)
-	size_t const MAX_PIXEL_FORMATS = 128;
-	int formats[MAX_PIXEL_FORMATS];
-	int pixel_format = 0;
-	UINT format_count = 0;
-
-	BOOL succeeded = wglChoosePixelFormatARB( hdc, 
-		format_attribs, 
-		nullptr, 
-		MAX_PIXEL_FORMATS, 
-		formats, 
-		(UINT*)&format_count );
-
-	if (!succeeded) {
-		return NULL; 
-	}
-
-	// Loop through returned formats, till we find one that works
-	for (UINT i = 0; i < format_count; ++i) {
-		pixel_format = formats[i];
-		succeeded = SetPixelFormat( hdc, pixel_format, NULL ); // same as the temp context; 
-		if (succeeded) {
-			break;
-		} else {
-			//DWORD error = GetLastError();
-			//DebuggerPrintf( "Failed to set the format: %u", error ); 
-		}
-	}
-
-	if (!succeeded) {
-		return NULL; 
-	}
-
-	// Okay, HDC is setup to the rihgt format, now create our GL context
-
-	// First, options for creating a debug context (potentially slower, but 
-	// driver may report more useful errors). 
-	int context_flags = 0; 
-#if defined(_DEBUG)
-	context_flags |= WGL_CONTEXT_DEBUG_BIT_ARB; 
-#endif
-
-	// describe the context
-	int const attribs[] = {
-		WGL_CONTEXT_MAJOR_VERSION_ARB, major,                             // Major GL Version
-		WGL_CONTEXT_MINOR_VERSION_ARB, minor,                             // Minor GL Version
-		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,   // Restrict to core (no compatibility)
-		WGL_CONTEXT_FLAGS_ARB, context_flags,                             // Misc flags (used for debug above)
-		0, 0
-	};
-
-	// Try to create context
-	HGLRC context = wglCreateContextAttribsARB( hdc, NULL, attribs );
-	if (context == NULL) {
-		return NULL; 
-	}
-
-	return context;
-}
-
-//-----------------------------------------------------------------------------------------------
-static HGLRC CreateOldRenderContext( HDC hdc ) 
-{
-	// Setup the output to be able to render how we want
-	// (in our case, an RGBA (4 bytes per channel) output that supports OpenGL
-	// and is double buffered
-	PIXELFORMATDESCRIPTOR pfd;
-	memset( &pfd, 0, sizeof(pfd) ); 
-	pfd.nSize = sizeof(pfd);
-	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 32;
-	pfd.cDepthBits = 0; // 24; Depth/Stencil handled by FBO
-	pfd.cStencilBits = 0; // 8; DepthStencil handled by FBO
-	pfd.iLayerType = PFD_MAIN_PLANE; // ignored now according to MSDN
-
-									 // Find a pixel format that matches our search criteria above. 
-	int pixel_format = ::ChoosePixelFormat( hdc, &pfd );
-	if ( pixel_format == NULL ) {
-		return NULL; 
-	}
-
-	// Set our HDC to have this output. 
-	if (!::SetPixelFormat( hdc, pixel_format, &pfd )) {
-		return NULL; 
-	}
-
-	// Create the context for the HDC
-	HGLRC context = wglCreateContext( hdc );
-	if (context == NULL) {
-		return NULL; 
-	}
-
-	// return the context; 
-	return context; 
-}
-
-//-----------------------------------------------------------------------------------------------
-void GLShutdown()
-{
-	wglMakeCurrent( gHDC, NULL ); 
-
-	::wglDeleteContext( gGLContext ); 
-	::ReleaseDC( gGLwnd, gHDC ); 
-
-	gGLContext = NULL; 
-	gHDC = NULL;
-	gGLwnd = NULL; 
-
-	::FreeLibrary( gGLLibrary );
-}

@@ -6,7 +6,7 @@
 void EngineStartUp()
 {
 	Renderer* renderer = new Renderer();
-	renderer->RenderStartup(Window::GetInstance()->GetHandle()); // call the static variable
+	renderer->Startup();
 	renderer = nullptr;
 }
 

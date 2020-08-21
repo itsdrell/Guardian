@@ -1,20 +1,20 @@
 #pragma once
-#include "Engine/Core/General/EngineCommon.hpp"
-#include "Engine/Renderer/Pipeline/RenderBuffer.hpp"
-#include "Engine/Renderer/RenderTypes.hpp"
-
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
-class Rgba;
-class AABB2;
-class Camera;
-class Shader;
-class FrameBuffer;
-struct Vertex3D_PCU;
-class Texture;
-class Sampler;
+struct ID3D11Device;
+struct ID3D11Device1;
+
+struct ID3D11DeviceContext;
+struct ID3D11DeviceContext1;
+
+struct IDXGISwapChain;
+struct IDXGISwapChain1;
+
+struct ID3D11RenderTargetView;
+struct ID3D11DepthStencilView;
+struct ID3D11Texture2D;
 
 //====================================================================================
 // Type Defs + Defines
@@ -24,7 +24,7 @@ class Sampler;
 //====================================================================================
 // ENUMS
 //====================================================================================
-enum PrimitiveType;
+
 
 //====================================================================================
 // Structs
@@ -41,65 +41,40 @@ public:
 	~Renderer();
 
 public:
-	void RenderStartup(void* hwnd);
-	void RenderPostStartUp();
+	static Renderer* GetInstance() { return s_renderer; }
+
+public:
+	void Startup();
+	void PostStartup();
+
+public:
 	void BeginFrame();
 	void EndFrame();
-	bool CopyFrameBuffer( FrameBuffer* dst, FrameBuffer* src );
 
-public:
-	void ClearScreen( const Rgba& clearColor );
-	void SetCamera( Camera* theCamera = nullptr );
-	void BindCameraToShader(const Camera& theCamera);
-	void SetShader( Shader* shader = nullptr );
-	void SetCurrentTexture( int bindIndex = 0, Texture* texture = nullptr);
-	Texture* CreateRenderTarget( int width, int height, eTextureFormat format = TEXTURE_FORMAT_RGBA8 );
-
-public:
-	void DrawAABB2( const AABB2& bounds, const Rgba& color, bool filled = true );
-	void DrawMeshImmediate( PrimitiveType primitiveType, Vertex3D_PCU* vertices, int numOfVertices );
-	void DrawMeshImmediate( PrimitiveType thePrimitive, uint vertexCount, Vertex3D_PCU* vertices, uint indicesCount = 0, uint* indices = nullptr );
-
-public:
-	static Renderer* GetInstance();
 
 private:
-	void* GetGLLibrary();
+	static Renderer* s_renderer;
 
-private:
-	static Renderer* s_theRenderer;
-
+// public till we remove everything out of game
 public:
+	ID3D11Device*			m_deviceInterface = nullptr;              // the device interface
+	ID3D11Device1*			m_deviceInterfaceOne = nullptr;              // This might be able to just be a temp variable??
 
-	Camera*				m_currentCamera = nullptr;
-	Camera*				m_defaultCamera = nullptr;
-									  
-	Shader*				m_currentShader = nullptr;
-	Shader*				m_defaultShader = nullptr;
+	ID3D11DeviceContext*	m_deviceImmediateContext = nullptr;    // the device context interface
+	ID3D11DeviceContext1*	m_deviceImmediateContextOne = nullptr;    // This might be able to just be a temp variable??
 
-	Sampler*			m_defaultSampler = nullptr;
-	Sampler*			m_currentSampler = nullptr;
+	IDXGISwapChain*         m_swapChain = nullptr;
+	IDXGISwapChain1*        m_swapChainOne = nullptr;
 
-	RenderBuffer*		m_immediateBuffer = nullptr;
-
-	UniformBuffer		m_cameraMatrixBuffer;
-	CameraMatrixT		m_cameraMatrixData;
-
-	UniformBuffer		m_modelMatrixBuffer;
-	ModelT				m_modelMatrixData;
-
-	Texture*			m_currentTexture = nullptr;
-	Texture*			m_defaultTexture = nullptr;
-	Texture*			m_defaultColorTarget = nullptr;
-	Texture*			m_defaultDepthTarget = nullptr;
-	unsigned int		m_defaultVAO; 
-	
+	ID3D11RenderTargetView* m_renderTargetView = nullptr;
+	ID3D11DepthStencilView* m_depthStencilView = nullptr;
+	ID3D11Texture2D*        m_depthStencil = nullptr;
 };
 
 //====================================================================================
 // Standalone C Functions
 //====================================================================================
-void GLShutdown();
+
 
 //====================================================================================
 // Externs
@@ -107,5 +82,5 @@ void GLShutdown();
 
 
 //====================================================================================
-// Written by Zachary Bracken : [1/29/2019]
+// Written by Zachary Bracken : [8/20/2020]
 //====================================================================================
