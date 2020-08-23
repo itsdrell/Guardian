@@ -1,6 +1,7 @@
 #include "Game.hpp"
 #include "Engine/Core/Platform/Window.hpp"
 #include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Renderer/Images/Texture.hpp"1
 
 #include <iostream>
 #include <stdio.h>
@@ -208,66 +209,6 @@ void Game::StartUp()
 
 	// Initialize the projection matrix
 	m_projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, theWindow->GetAspect(), 0.01f, 100.0f);
-
-
-	//-----------------------------------------------------------------------------------------------
-	// Texture stuff :l 
-	int textureDimensionX = 0;
-	int textureDimensionY = 0;
-	int numberOfComponents = 0;
-	int numberOfComponentsRequested = 0;
-
-	// Get the buffer using stbi
-	// Load (and decompress) the image RGB(A) bytes from a file on disk, and create an OpenGL texture instance from it
-	unsigned char* imageData = stbi_load("Data/Images/Test_StbiAndDirectX.png", &textureDimensionX, &textureDimensionY, &numberOfComponents, numberOfComponentsRequested);
-
-	// Create the texture resource (https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-textures-create)
-	// https://www.rastertek.com/dx11s2tut05.html
-	// This is creating a default texture we are going to fill with data
-	D3D11_TEXTURE2D_DESC textureDesc;
-	textureDesc.Width = textureDimensionX;
-	textureDesc.Height = textureDimensionY;
-	textureDesc.ArraySize = 1;
-	textureDesc.MipLevels = 0; 
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-	hr = r->m_deviceInterface->CreateTexture2D(&textureDesc, NULL, &m_testTexture);
-	r->m_deviceImmediateContext->UpdateSubresource(m_testTexture, 0, NULL, imageData, (textureDesc.Width * 4) * sizeof(unsigned char), 0);
-
-	// Create the Shader Resource View for the texture
-	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
-	shaderResourceViewDesc.Format = textureDesc.Format;
-	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	hr = r->m_deviceInterface->CreateShaderResourceView(m_testTexture, &shaderResourceViewDesc, &m_testTextureView);
-	r->m_deviceImmediateContext->GenerateMips(m_testTextureView);
-
-	// Create the sampler description
-	D3D11_SAMPLER_DESC sampleDescription = {};
-	sampleDescription.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampleDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampleDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampleDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampleDescription.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampleDescription.MinLOD = 0;
-	sampleDescription.MaxLOD = D3D11_FLOAT32_MAX;
-
-	// Create the sampler
-	hr = r->m_deviceInterface->CreateSamplerState(&sampleDescription, &m_testTextureSampler);
-
-	// Bind both sampler and texture to shader
-	r->m_deviceImmediateContext->PSSetShaderResources(0, 1, &m_testTextureView);
-	r->m_deviceImmediateContext->PSSetSamplers(0, 1, &m_testTextureSampler);
-
-	stbi_image_free(imageData);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -300,6 +241,10 @@ void Game::Render() const
 	// set shaders
 	r->m_deviceImmediateContext->VSSetShader(m_vertexShader, nullptr, 0);
 	r->m_deviceImmediateContext->PSSetShader(m_pixelShader, nullptr, 0);
+
+	// Bind both sampler and texture to shader
+	r->m_deviceImmediateContext->PSSetShaderResources(0, 1, &r->m_testTexture->m_textureView);
+	r->m_deviceImmediateContext->PSSetSamplers(0, 1, &r->m_testTexture->m_textureSampler);
 
 	// draw big cube
 	ConstantBuffer cb;

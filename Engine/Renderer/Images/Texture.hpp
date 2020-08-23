@@ -1,22 +1,13 @@
 #pragma once
-#include <windows.h>
-#include <d3d11_1.h>
-#include <directxcolors.h>
-
-#include <string>
-#include <vector>
-
-#include "Engine/Math/Vectors/Vector3.hpp"
-#include "Engine/Math/Vectors/Vector4.hpp"
-#include "Engine/Math/Vectors/Vector2.hpp"
-
-using namespace DirectX;
+#include "Engine/Core/General/EngineCommon.hpp"
+#include "Engine/Math/Vectors/IntVector2.hpp"
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
-
-
+struct ID3D11Texture2D;
+struct ID3D11ShaderResourceView;
+struct ID3D11SamplerState;
 //====================================================================================
 // Type Defs + Defines
 //====================================================================================
@@ -30,70 +21,34 @@ using namespace DirectX;
 //====================================================================================
 // Structs
 //====================================================================================
-struct Vertex
-{
-	Vertex(const Vector3& thePos, const Vector4& theColor, const Vector2& theUvs)
-		: pos(thePos)
-		, color(theColor) 
-		, uv(theUvs) {}
 
-	Vector3 pos;
-	Vector4	color; // normalized
-	Vector2 uv;
-};
-
-struct SimpleVertex
-{
-	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
-};
-
-
-struct ConstantBuffer
-{
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
-};
 
 //====================================================================================
 // Classes
 //====================================================================================
-class Game
+class Texture
 {
+	// maybe change this to an asset manager later?
+	friend class Renderer;
+
 public:
-	Game();
-	~Game();
-
-public: 
-	void StartUp();
-	void Update(float ds);
-	void Render() const;
+	Texture(const String& path);
+	~Texture();
 
 private:
-	bool LoadCompiledShaderFromFile(const std::string& path, int& sizeOut, char*& out);
+	void PopulateFromData(unsigned char* imageData, int numberOfComponents);
 
-private:
-	ID3D11VertexShader*		m_vertexShader = nullptr;
-	ID3D11PixelShader*		m_pixelShader = nullptr;
 
-	ID3D11InputLayout*		m_vertexLayout = nullptr;
-	ID3D11Buffer*			m_vertexBuffer = nullptr;
-	ID3D11Buffer*			m_indexBuffer = nullptr;
+public:
+	IntVector2	m_dimensions;
 
-	// constant buffer for transformations
-	ID3D11Buffer*			m_constantBuffer = nullptr;
-	XMMATRIX				m_bigCubeWorld;
-	XMMATRIX				m_smallCubeWorld;
+// should be private once we add methods to create and get in renderer
+public:
+	ID3D11Texture2D*			m_texture = nullptr;
+	ID3D11ShaderResourceView*	m_textureView = nullptr;
 
-	XMMATRIX				m_view;
-	XMMATRIX				m_projection;
-
-	// texture stuff
-	//ID3D11Texture2D*			m_testTexture = nullptr;
-	//ID3D11ShaderResourceView*	m_testTextureView = nullptr;
-	//ID3D11SamplerState*			m_testTextureSampler = nullptr; // linear
-						
+	// Make this a Sampler class?
+	ID3D11SamplerState*			m_textureSampler = nullptr;
 };
 
 //====================================================================================
@@ -104,8 +59,8 @@ private:
 //====================================================================================
 // Externs
 //====================================================================================
-extern Game* g_theGame;
+
 
 //====================================================================================
-// Written by Zachary Bracken : [8/2/2020]
+// Written by Zachary Bracken : [8/22/2020]
 //====================================================================================

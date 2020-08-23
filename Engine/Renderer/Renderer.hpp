@@ -16,6 +16,8 @@ struct ID3D11RenderTargetView;
 struct ID3D11DepthStencilView;
 struct ID3D11Texture2D;
 
+class Texture;
+
 //====================================================================================
 // Type Defs + Defines
 //====================================================================================
@@ -69,6 +71,9 @@ public:
 	ID3D11RenderTargetView* m_renderTargetView = nullptr;
 	ID3D11DepthStencilView* m_depthStencilView = nullptr;
 	ID3D11Texture2D*        m_depthStencil = nullptr;
+
+public:
+	Texture*				m_testTexture = nullptr;
 };
 
 //====================================================================================

@@ -1,11 +1,11 @@
-#include "Renderer.hpp"
-#include "Engine/Core/Platform/Window.hpp"
-
 #define WIN32_LEAN_AND_MEAN 
 #include <windows.h>
 #include <d3d11_1.h>
 #include <directxcolors.h>
 
+#include "Renderer.hpp"
+#include "Engine/Renderer/Images/Texture.hpp"
+#include "Engine/Core/Platform/Window.hpp"
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
 
@@ -29,6 +29,9 @@ Renderer::~Renderer()
 	if (m_renderTargetView) m_renderTargetView->Release();
 	if (m_depthStencil) m_depthStencil->Release();
 	if (m_depthStencilView) m_depthStencilView->Release();
+
+	delete m_testTexture;
+	m_testTexture = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -164,12 +167,14 @@ void Renderer::Startup()
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	m_deviceImmediateContext->RSSetViewports(1, &vp);
+
+	PostStartup();
 }
 
 //-----------------------------------------------------------------------------------------------
 void Renderer::PostStartup()
 {
-
+	m_testTexture = new Texture("Data/Images/Test_StbiAndDirectX.png");
 }
 
 //-----------------------------------------------------------------------------------------------
