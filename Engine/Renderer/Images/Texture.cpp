@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 #include "Engine/ThirdParty/stbi/stb_image.h"
 #include <d3d11_1.h>
-#include "../Renderer.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 //===============================================================================================
 Texture::Texture(const String& path)

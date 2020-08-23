@@ -1,28 +1,16 @@
 #pragma once
+#include "Engine/Core/General/EngineCommon.hpp"
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
-struct ID3D11Device;
-struct ID3D11Device1;
-
-struct ID3D11DeviceContext;
-struct ID3D11DeviceContext1;
-
-struct IDXGISwapChain;
-struct IDXGISwapChain1;
-
-struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilView;
-struct ID3D11Texture2D;
-
-class Texture;
-class ShaderProgram;
+struct ID3D11VertexShader;
+struct ID3D11PixelShader;
 
 //====================================================================================
 // Type Defs + Defines
 //====================================================================================
-
+constexpr const char* COMPILED_SHADER_LOCATION = "Data\\Shaders\\Compiled\\";
 
 //====================================================================================
 // ENUMS
@@ -37,45 +25,25 @@ class ShaderProgram;
 //====================================================================================
 // Classes
 //====================================================================================
-class Renderer
+class ShaderProgram
 {
 public:
-	Renderer();
-	~Renderer();
-
-public:
-	static Renderer* GetInstance() { return s_renderer; }
-
-public:
-	void Startup();
-	void PostStartup();
-
-public:
-	void BeginFrame();
-	void EndFrame();
-
+	ShaderProgram(const String& vertexName, const String& pixelName);
+	~ShaderProgram();
 
 private:
-	static Renderer* s_renderer;
-
-// public till we remove everything out of game
-public:
-	ID3D11Device*			m_deviceInterface = nullptr;              // the device interface
-	ID3D11Device1*			m_deviceInterfaceOne = nullptr;              // This might be able to just be a temp variable??
-
-	ID3D11DeviceContext*	m_deviceImmediateContext = nullptr;    // the device context interface
-	ID3D11DeviceContext1*	m_deviceImmediateContextOne = nullptr;    // This might be able to just be a temp variable??
-
-	IDXGISwapChain*         m_swapChain = nullptr;
-	IDXGISwapChain1*        m_swapChainOne = nullptr;
-
-	ID3D11RenderTargetView* m_renderTargetView = nullptr;
-	ID3D11DepthStencilView* m_depthStencilView = nullptr;
-	ID3D11Texture2D*        m_depthStencil = nullptr;
+	void CreateVertexAndPixelShader(const String& vertexPath, const String& pixelPath);
+	bool LoadCompiledShaderFromFile(const String& path, int& sizeOut, char*& out);
 
 public:
-	Texture*				m_testTexture = nullptr;
-	ShaderProgram*			m_testShaderProgram = nullptr;
+	// Its annoying we have to keep buffer and size but CreateInputLayout requires us to hold onto them??? :l 
+	ID3D11VertexShader*		m_vertexShader = nullptr;
+	char*					m_vertexBuffer = nullptr;
+	int						m_vertexBufferSize = 0;
+
+	ID3D11PixelShader*		m_pixelShader = nullptr;
+	char*					m_pixelBuffer = nullptr;
+	int						m_pixelBufferSize = 0;
 };
 
 //====================================================================================
@@ -89,5 +57,5 @@ public:
 
 
 //====================================================================================
-// Written by Zachary Bracken : [8/20/2020]
+// Written by Zachary Bracken : [8/22/2020]
 //====================================================================================

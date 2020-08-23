@@ -74,8 +74,7 @@ private:
 	bool LoadCompiledShaderFromFile(const std::string& path, int& sizeOut, char*& out);
 
 private:
-	ID3D11VertexShader*		m_vertexShader = nullptr;
-	ID3D11PixelShader*		m_pixelShader = nullptr;
+
 
 	ID3D11InputLayout*		m_vertexLayout = nullptr;
 	ID3D11Buffer*			m_vertexBuffer = nullptr;

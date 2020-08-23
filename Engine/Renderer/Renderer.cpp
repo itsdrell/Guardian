@@ -6,6 +6,8 @@
 #include "Renderer.hpp"
 #include "Engine/Renderer/Images/Texture.hpp"
 #include "Engine/Core/Platform/Window.hpp"
+#include "Engine/Renderer/Pipeline/ShaderProgram.hpp"
+
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
 
@@ -32,6 +34,9 @@ Renderer::~Renderer()
 
 	delete m_testTexture;
 	m_testTexture = nullptr;
+
+	delete m_testShaderProgram;
+	m_testShaderProgram = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -175,6 +180,7 @@ void Renderer::Startup()
 void Renderer::PostStartup()
 {
 	m_testTexture = new Texture("Data/Images/Test_StbiAndDirectX.png");
+	m_testShaderProgram = new ShaderProgram("TestVertShader", "TestPixelShader");
 }
 
 //-----------------------------------------------------------------------------------------------

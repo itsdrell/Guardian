@@ -175,6 +175,7 @@
     <ClInclude Include="Math\Vectors\Vector3.hpp" />
     <ClInclude Include="Math\Vectors\Vector4.hpp" />
     <ClInclude Include="Renderer\Images\Texture.hpp" />
+    <ClInclude Include="Renderer\Pipeline\ShaderProgram.hpp" />
     <ClInclude Include="Renderer\Renderer.hpp" />
     <ClInclude Include="ThirdParty\stbi\stb_image.h" />
     <ClInclude Include="ThirdParty\stbi\stb_image_write.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="Math\Vectors\Vector3.cpp" />
     <ClCompile Include="Math\Vectors\Vector4.cpp" />
     <ClCompile Include="Renderer\Images\Texture.cpp" />
+    <ClCompile Include="Renderer\Pipeline\ShaderProgram.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="ThirdParty\stbi\stb_image.c" />
     <ClCompile Include="ThirdParty\stbi\stb_image_write.cpp" />

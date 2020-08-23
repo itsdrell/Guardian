@@ -1,7 +1,8 @@
 #include "Game.hpp"
 #include "Engine/Core/Platform/Window.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-#include "Engine/Renderer/Images/Texture.hpp"1
+#include "Engine/Renderer/Images/Texture.hpp"
+#include "Engine/Renderer/Pipeline/ShaderProgram.hpp"
 
 #include <iostream>
 #include <stdio.h>
@@ -26,8 +27,7 @@ Game::Game()
 //-----------------------------------------------------------------------------------------------
 Game::~Game()
 {
-	if (m_vertexShader) m_vertexShader->Release();
-	if (m_pixelShader) m_vertexShader->Release();
+
 	if (m_vertexLayout) m_vertexLayout->Release();
 	if (m_vertexBuffer) m_vertexBuffer->Release();
 }
@@ -39,32 +39,6 @@ void Game::StartUp()
 	Window* theWindow = Window::GetInstance();
 	Renderer* r = Renderer::GetInstance();
 
-	//-----------------------------------------------------------------------------------------------
-	// Create pixel shader
-	int pixelShaderlength = 0;
-	char* pixelShaderBuffer = nullptr;
-	
-	bool result = LoadCompiledShaderFromFile("Data\\Shaders\\Compiled\\TestPixelShader.cso", pixelShaderlength, pixelShaderBuffer);
-	if(result == false)
-	{
-		return;
-	}
-	
-	hr = r->m_deviceInterface->CreatePixelShader(pixelShaderBuffer, pixelShaderlength, nullptr, &m_pixelShader);
-
-	//-----------------------------------------------------------------------------------------------
-	// create vertex shader
-	int vertexShaderLength = 0;
-	char* vertexShaderBuffer = nullptr;
-	result = LoadCompiledShaderFromFile("Data\\Shaders\\Compiled\\TestVertShader.cso", vertexShaderLength, vertexShaderBuffer);
-
-	if (result == false)
-	{
-		return;
-	}
-	
-	hr = r->m_deviceInterface->CreateVertexShader(vertexShaderBuffer, vertexShaderLength, nullptr, &m_vertexShader);
-
 	// input layout for vertex shader
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -73,16 +47,8 @@ void Game::StartUp()
 		{ "TEXTURE_COORDS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
-	hr = r->m_deviceInterface->CreateInputLayout(layout, ARRAYSIZE(layout), vertexShaderBuffer, vertexShaderLength, &m_vertexLayout);
+	hr = r->m_deviceInterface->CreateInputLayout(layout, ARRAYSIZE(layout), r->m_testShaderProgram->m_vertexBuffer, r->m_testShaderProgram->m_vertexBufferSize, &m_vertexLayout);
 	r->m_deviceImmediateContext->IASetInputLayout(m_vertexLayout);
-
-	//-----------------------------------------------------------------------------------------------
-	// set the shaders as active
-	r->m_deviceImmediateContext->VSSetShader(m_vertexShader, nullptr, 0);
-	r->m_deviceImmediateContext->PSSetShader(m_pixelShader, nullptr, 0);
-	
-	free(pixelShaderBuffer);
-	free(vertexShaderBuffer);
 
 	//-----------------------------------------------------------------------------------------------
 	// Create the vertex buffer
@@ -239,8 +205,8 @@ void Game::Render() const
 	Renderer* r = Renderer::GetInstance();
 	
 	// set shaders
-	r->m_deviceImmediateContext->VSSetShader(m_vertexShader, nullptr, 0);
-	r->m_deviceImmediateContext->PSSetShader(m_pixelShader, nullptr, 0);
+	r->m_deviceImmediateContext->VSSetShader(r->m_testShaderProgram->m_vertexShader, nullptr, 0);
+	r->m_deviceImmediateContext->PSSetShader(r->m_testShaderProgram->m_pixelShader, nullptr, 0);
 
 	// Bind both sampler and texture to shader
 	r->m_deviceImmediateContext->PSSetShaderResources(0, 1, &r->m_testTexture->m_textureView);
