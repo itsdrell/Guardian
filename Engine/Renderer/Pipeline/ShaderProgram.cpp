@@ -9,6 +9,7 @@ ShaderProgram::ShaderProgram(const String& vertexName, const String& pixelName)
 	String pixelPath = COMPILED_SHADER_LOCATION + pixelName + ".cso";
 
 	CreateVertexAndPixelShader(vertexPath, pixelPath);
+	CreateInputLayout();
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -43,6 +44,25 @@ void ShaderProgram::CreateVertexAndPixelShader(const String& vertexPath, const S
 	}
 
 	hr = r->m_deviceInterface->CreateVertexShader(m_vertexBuffer, m_vertexBufferSize, nullptr, &m_vertexShader);
+}
+
+//-----------------------------------------------------------------------------------------------
+// This may not be the best place to do it, also it forces us to only have one type :l 
+// but I feel like the shader program should own the ID3D11InputLayout
+void ShaderProgram::CreateInputLayout()
+{
+	HRESULT hr = S_OK;
+	Renderer* r = Renderer::GetInstance();
+	
+	// input layout for vertex shader
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{ "TEXTURE_COORDS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
+
+	hr = r->m_deviceInterface->CreateInputLayout(layout, ARRAYSIZE(layout), m_vertexBuffer, m_vertexBufferSize, &m_vertexLayout);
 }
 
 //-----------------------------------------------------------------------------------------------

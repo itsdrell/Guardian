@@ -26,6 +26,8 @@
     <ClInclude Include="Renderer\Renderer.hpp" />
     <ClInclude Include="Renderer\Images\Texture.hpp" />
     <ClInclude Include="Renderer\Pipeline\ShaderProgram.hpp" />
+    <ClInclude Include="Renderer\Pipeline\Shader.hpp" />
+    <ClInclude Include="Renderer\Pipeline\RenderState.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Platform\Window.cpp">
@@ -80,6 +82,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Pipeline\ShaderProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Pipeline\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Pipeline\RenderState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

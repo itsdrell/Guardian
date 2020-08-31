@@ -6,6 +6,7 @@
 //====================================================================================
 struct ID3D11VertexShader;
 struct ID3D11PixelShader;
+struct ID3D11InputLayout;
 
 //====================================================================================
 // Type Defs + Defines
@@ -33,6 +34,7 @@ public:
 
 private:
 	void CreateVertexAndPixelShader(const String& vertexPath, const String& pixelPath);
+	void CreateInputLayout();
 	bool LoadCompiledShaderFromFile(const String& path, int& sizeOut, char*& out);
 
 public:
@@ -44,6 +46,9 @@ public:
 	ID3D11PixelShader*		m_pixelShader = nullptr;
 	char*					m_pixelBuffer = nullptr;
 	int						m_pixelBufferSize = 0;
+
+	// this could be its own class???
+	ID3D11InputLayout*		m_vertexLayout = nullptr;
 };
 
 //====================================================================================

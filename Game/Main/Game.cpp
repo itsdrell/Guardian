@@ -39,17 +39,6 @@ void Game::StartUp()
 	Window* theWindow = Window::GetInstance();
 	Renderer* r = Renderer::GetInstance();
 
-	// input layout for vertex shader
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{ "TEXTURE_COORDS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
-
-	hr = r->m_deviceInterface->CreateInputLayout(layout, ARRAYSIZE(layout), r->m_testShaderProgram->m_vertexBuffer, r->m_testShaderProgram->m_vertexBufferSize, &m_vertexLayout);
-	r->m_deviceImmediateContext->IASetInputLayout(m_vertexLayout);
-
 	//-----------------------------------------------------------------------------------------------
 	// Create the vertex buffer
 	//Vertex vertices[] =
@@ -204,13 +193,10 @@ void Game::Render() const
 {
 	Renderer* r = Renderer::GetInstance();
 	
-	// set shaders
-	r->m_deviceImmediateContext->VSSetShader(r->m_testShaderProgram->m_vertexShader, nullptr, 0);
-	r->m_deviceImmediateContext->PSSetShader(r->m_testShaderProgram->m_pixelShader, nullptr, 0);
+	r->SetActiveShader(r->m_testShader);
 
 	// Bind both sampler and texture to shader
-	r->m_deviceImmediateContext->PSSetShaderResources(0, 1, &r->m_testTexture->m_textureView);
-	r->m_deviceImmediateContext->PSSetSamplers(0, 1, &r->m_testTexture->m_textureSampler);
+	r->SetActiveTexture(0, r->m_testTexture);
 
 	// draw big cube
 	ConstantBuffer cb;
@@ -244,30 +230,3 @@ void Game::Render() const
 
 	// set indices as well
 }
-
-
-
-//-----------------------------------------------------------------------------------------------
-// doesn't do any deleting
-bool Game::LoadCompiledShaderFromFile(const std::string& path, int& sizeOut, char*& out)
-{
-	// I would make this into a function thats like "LoadFileIntoBuffer"
-	// and add some error checking
-	
-	FILE *fl;
-	fopen_s(&fl, path.c_str(), "rb");
-	
-	fseek(fl, 0, SEEK_END);
-	long len = ftell(fl);
-	
-	out = (char*)malloc(len);
-	
-	fseek(fl, 0, SEEK_SET);
-	fread(out, 1, len, fl);
-	fclose(fl);
-
-	sizeOut = len;
-
-	return true;
-}
-

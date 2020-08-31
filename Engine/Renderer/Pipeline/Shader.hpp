@@ -1,24 +1,10 @@
 #pragma once
+#include "Engine/Core/General/EngineCommon.hpp"
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
-struct ID3D11Device;
-struct ID3D11Device1;
-
-struct ID3D11DeviceContext;
-struct ID3D11DeviceContext1;
-
-struct IDXGISwapChain;
-struct IDXGISwapChain1;
-
-struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilView;
-struct ID3D11Texture2D;
-
-class Texture;
 class ShaderProgram;
-class Shader;
 class RenderState;
 
 //====================================================================================
@@ -39,51 +25,17 @@ class RenderState;
 //====================================================================================
 // Classes
 //====================================================================================
-class Renderer
+class Shader
 {
 public:
-	Renderer();
-	~Renderer();
+	Shader(const String& name, ShaderProgram* program, RenderState* state);
+	~Shader();
 
 public:
-	static Renderer* GetInstance() { return s_renderer; }
+	String			m_name;
 
-public:
-	void Startup();
-	void PostStartup();
-
-public:
-	void BeginFrame();
-	void EndFrame();
-
-public:
-	void SetActiveTexture(int slot, const Texture* theTexture);
-	void SetActiveShader(const Shader* theShader);
-
-
-private:
-	static Renderer* s_renderer;
-
-// public till we remove everything out of game
-public:
-	ID3D11Device*			m_deviceInterface = nullptr;              // the device interface
-	ID3D11Device1*			m_deviceInterfaceOne = nullptr;              // This might be able to just be a temp variable??
-
-	ID3D11DeviceContext*	m_deviceImmediateContext = nullptr;    // the device context interface
-	ID3D11DeviceContext1*	m_deviceImmediateContextOne = nullptr;    // This might be able to just be a temp variable??
-
-	IDXGISwapChain*         m_swapChain = nullptr;
-	IDXGISwapChain1*        m_swapChainOne = nullptr;
-
-	ID3D11RenderTargetView* m_renderTargetView = nullptr;
-	ID3D11DepthStencilView* m_depthStencilView = nullptr;
-	ID3D11Texture2D*        m_depthStencil = nullptr;
-
-public:
-	Texture*				m_testTexture = nullptr;
-	ShaderProgram*			m_testShaderProgram = nullptr;
-	Shader*					m_testShader = nullptr;
-	RenderState*			m_testRenderState = nullptr;
+	ShaderProgram*	m_program = nullptr;
+	RenderState*	m_state = nullptr;
 };
 
 //====================================================================================
@@ -97,5 +49,5 @@ public:
 
 
 //====================================================================================
-// Written by Zachary Bracken : [8/20/2020]
+// Written by Zachary Bracken : [8/30/2020]
 //====================================================================================

@@ -7,6 +7,8 @@
 #include "Engine/Renderer/Images/Texture.hpp"
 #include "Engine/Core/Platform/Window.hpp"
 #include "Engine/Renderer/Pipeline/ShaderProgram.hpp"
+#include "Engine/Renderer/Pipeline/Shader.hpp"
+#include "Engine/Renderer/Pipeline/RenderState.hpp"
 
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
@@ -180,7 +182,10 @@ void Renderer::Startup()
 void Renderer::PostStartup()
 {
 	m_testTexture = new Texture("Data/Images/Test_StbiAndDirectX.png");
+	
 	m_testShaderProgram = new ShaderProgram("TestVertShader", "TestPixelShader");
+	m_testRenderState = new RenderState();
+	m_testShader = new Shader("TestShader", m_testShaderProgram, m_testRenderState);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -200,4 +205,23 @@ void Renderer::EndFrame()
 	m_swapChain->Present(0, 0);
 }
 
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetActiveTexture(int slot, const Texture* theTexture)
+{
+	m_deviceImmediateContext->PSSetShaderResources(slot, 1, &theTexture->m_textureView);
+	m_deviceImmediateContext->PSSetSamplers(slot, 1, &theTexture->m_textureSampler);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetActiveShader(const Shader* theShader)
+{
+	m_deviceImmediateContext->VSSetShader(theShader->m_program->m_vertexShader, nullptr, 0);
+	m_deviceImmediateContext->PSSetShader(theShader->m_program->m_pixelShader, nullptr, 0);
+
+	m_deviceImmediateContext->OMSetBlendState(	theShader->m_state->m_blendState, 
+												theShader->m_state->m_blendFactor, 
+												theShader->m_state->m_mask);
+
+	m_deviceImmediateContext->IASetInputLayout(theShader->m_program->m_vertexLayout);
+}
 
