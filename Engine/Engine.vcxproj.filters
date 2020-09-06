@@ -28,6 +28,7 @@
     <ClInclude Include="Renderer\Pipeline\ShaderProgram.hpp" />
     <ClInclude Include="Renderer\Pipeline\Shader.hpp" />
     <ClInclude Include="Renderer\Pipeline\RenderState.hpp" />
+    <ClInclude Include="Renderer\Pipeline\RenderBuffers.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Platform\Window.cpp">
@@ -88,6 +89,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Pipeline\RenderState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Pipeline\RenderBuffers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

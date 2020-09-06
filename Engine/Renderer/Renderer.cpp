@@ -9,6 +9,7 @@
 #include "Engine/Renderer/Pipeline/ShaderProgram.hpp"
 #include "Engine/Renderer/Pipeline/Shader.hpp"
 #include "Engine/Renderer/Pipeline/RenderState.hpp"
+#include "Engine/Renderer/Pipeline/RenderBuffers.hpp"
 
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
@@ -223,5 +224,29 @@ void Renderer::SetActiveShader(const Shader* theShader)
 												theShader->m_state->m_mask);
 
 	m_deviceImmediateContext->IASetInputLayout(theShader->m_program->m_vertexLayout);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetVertexBuffer(const VertexBuffer* buffer)
+{
+	m_deviceImmediateContext->IASetVertexBuffers(0, 1, &buffer->m_buffer, &buffer->m_stride, &buffer->m_offset);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetIndexBuffer(const IndexBuffer* buffer)
+{
+	m_deviceImmediateContext->IASetIndexBuffer(buffer->m_buffer, DXGI_FORMAT_R16_UINT, buffer->m_offset);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetConstantBuffer(uint slot, const ConstantBuffer* buffer)
+{
+	m_deviceImmediateContext->VSSetConstantBuffers(slot, 1, &buffer->m_buffer);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::UpdateConstantBuffer(const ConstantBuffer* buffer, void* data)
+{
+	m_deviceImmediateContext->UpdateSubresource(buffer->m_buffer, 0, nullptr, data, 0, 0);
 }
 

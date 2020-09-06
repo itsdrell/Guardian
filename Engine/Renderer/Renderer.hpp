@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Core/General/EngineCommon.hpp"
 
 //====================================================================================
 // Forward Declare
@@ -20,6 +21,10 @@ class Texture;
 class ShaderProgram;
 class Shader;
 class RenderState;
+
+class VertexBuffer;
+class IndexBuffer;
+class ConstantBuffer;
 
 //====================================================================================
 // Type Defs + Defines
@@ -60,6 +65,12 @@ public:
 	void SetActiveTexture(int slot, const Texture* theTexture);
 	void SetActiveShader(const Shader* theShader);
 
+public:
+	void SetVertexBuffer(const VertexBuffer* buffer);
+	void SetIndexBuffer(const IndexBuffer* buffer);
+	void SetConstantBuffer(uint slot, const ConstantBuffer* buffer);
+
+	void UpdateConstantBuffer(const ConstantBuffer* buffer, void* data);
 
 private:
 	static Renderer* s_renderer;

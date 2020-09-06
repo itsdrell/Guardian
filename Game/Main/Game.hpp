@@ -15,7 +15,9 @@ using namespace DirectX;
 //====================================================================================
 // Forward Declare
 //====================================================================================
-
+class VertexBuffer;
+class IndexBuffer;
+class ConstantBuffer;
 
 //====================================================================================
 // Type Defs + Defines
@@ -49,7 +51,7 @@ struct SimpleVertex
 };
 
 
-struct ConstantBuffer
+struct TestConstantBuffer
 {
 	XMMATRIX mWorld;
 	XMMATRIX mView;
@@ -72,15 +74,10 @@ public:
 
 private:
 
+	VertexBuffer*			m_vertexBuffer = nullptr;
+	IndexBuffer*			m_indexBuffer = nullptr;
+	ConstantBuffer*			m_constantBuffer = nullptr;
 
-	ID3D11InputLayout*		m_vertexLayout = nullptr;
-	ID3D11Buffer*			m_vertexBuffer = nullptr;
-	ID3D11Buffer*			m_indexBuffer = nullptr;
-
-	ID3D11BlendState*		m_blendState = nullptr;
-
-	// constant buffer for transformations
-	ID3D11Buffer*			m_constantBuffer = nullptr;
 	XMMATRIX				m_bigCubeWorld;
 	XMMATRIX				m_smallCubeWorld;
 
