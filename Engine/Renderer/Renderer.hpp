@@ -74,10 +74,12 @@ public:
 
 	void UpdateConstantBuffer(const ConstantBuffer* buffer, void* data);
 
+public:
+	void DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMaster* vertices, uint indexCount, Indices* indicies);
+
 private:
 	static Renderer* s_renderer;
 
-// public till we remove everything out of game
 public:
 	ID3D11Device*			m_deviceInterface = nullptr;              // the device interface
 	ID3D11Device1*			m_deviceInterfaceOne = nullptr;              // This might be able to just be a temp variable??
@@ -85,12 +87,17 @@ public:
 	ID3D11DeviceContext*	m_deviceImmediateContext = nullptr;    // the device context interface
 	ID3D11DeviceContext1*	m_deviceImmediateContextOne = nullptr;    // This might be able to just be a temp variable??
 
+private:
 	IDXGISwapChain*         m_swapChain = nullptr;
 	IDXGISwapChain1*        m_swapChainOne = nullptr;
 
 	ID3D11RenderTargetView* m_renderTargetView = nullptr;
 	ID3D11DepthStencilView* m_depthStencilView = nullptr;
 	ID3D11Texture2D*        m_depthStencil = nullptr;
+
+private:
+	VertexBuffer*			m_tempImmediateVertexBuffer = nullptr;
+	IndexBuffer*			m_tempImmediateIndexBuffer = nullptr;
 
 public:
 	Texture*				m_testTexture = nullptr;

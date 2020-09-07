@@ -47,6 +47,12 @@ Renderer::~Renderer()
 
 	delete m_testShaderProgram;
 	m_testShaderProgram = nullptr;
+
+	delete m_tempImmediateIndexBuffer;
+	m_tempImmediateIndexBuffer = nullptr;
+
+	delete m_tempImmediateVertexBuffer;
+	m_tempImmediateVertexBuffer = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -261,5 +267,43 @@ void Renderer::SetConstantBuffer(uint slot, const ConstantBuffer* buffer)
 void Renderer::UpdateConstantBuffer(const ConstantBuffer* buffer, void* data)
 {
 	m_deviceImmediateContext->UpdateSubresource(buffer->m_buffer, 0, nullptr, data, 0, 0);
+}
+
+//-----------------------------------------------------------------------------------------------
+// Requires indicies 
+void Renderer::DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMaster* vertices, uint indexCount, Indices* indicies)
+{
+	if(indicies == nullptr)
+	{
+		TODO("ERROR check here pls")
+		return;
+	}
+	
+	SetPrimitiveType(type);
+
+	// maybe bind current shader and current texture?
+
+	// We are deleting the temp buffers for each draw. Weird issue where either you do this, OR
+	// create them with a giant fixed size (like a mil) and then update sub resource 
+	// https://stackoverflow.com/questions/26453773/direct3d-c-api-how-to-update-vertex-buffer
+	if(m_tempImmediateVertexBuffer != nullptr)
+	{
+		delete m_tempImmediateVertexBuffer;
+		m_tempImmediateVertexBuffer = nullptr;
+	}
+
+	if(m_tempImmediateIndexBuffer != nullptr)
+	{
+		delete m_tempImmediateIndexBuffer;
+		m_tempImmediateIndexBuffer = nullptr;
+	}
+
+	m_tempImmediateVertexBuffer = new VertexBuffer(vertexCount, sizeof(VertexMaster), vertices);
+	m_tempImmediateIndexBuffer = new IndexBuffer(indexCount, sizeof(uint), indicies);
+
+	SetVertexBuffer(m_tempImmediateVertexBuffer);
+	SetIndexBuffer(m_tempImmediateIndexBuffer);
+
+	m_deviceImmediateContext->DrawIndexed(indexCount, 0, 0);
 }
 

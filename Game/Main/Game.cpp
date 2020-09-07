@@ -19,6 +19,61 @@ static float depthPos = -4.5f;
 //===============================================================================================
 Game* g_theGame = nullptr;
 //===============================================================================================
+VertexMaster vertices[] =
+{
+	VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+	VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+	VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+	VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+
+	VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+	VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+	VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+	VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+
+	VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+	VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+	VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+	VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+
+	VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+	VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+	VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+	VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+
+	VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+	VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+	VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+	VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+
+	VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
+	VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
+	VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
+	VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
+};
+
+uint16 indices[] =
+{
+	3,1,0,
+	2,1,3,
+
+	6,4,5,
+	7,4,6,
+
+	11,9,8,
+	10,9,11,
+
+	14,12,13,
+	15,12,14,
+
+	19,17,16,
+	18,17,19,
+
+	22,20,21,
+	23,20,22
+};
+
+//===============================================================================================
 Game::Game()
 {
 	g_theGame = this;
@@ -29,12 +84,6 @@ Game::Game()
 //-----------------------------------------------------------------------------------------------
 Game::~Game()
 {
-	delete m_vertexBuffer;
-	m_vertexBuffer = nullptr;
-
-	delete m_indexBuffer;
-	m_indexBuffer = nullptr;
-
 	delete m_constantBuffer;
 	m_constantBuffer = nullptr;
 }
@@ -42,9 +91,7 @@ Game::~Game()
 //-----------------------------------------------------------------------------------------------
 void Game::StartUp()
 {
-	HRESULT hr = S_OK;
 	Window* theWindow = Window::GetInstance();
-	Renderer* r = Renderer::GetInstance();
 
 	//-----------------------------------------------------------------------------------------------
 	// Create the vertex buffer
@@ -60,67 +107,6 @@ void Game::StartUp()
 	//	Vertex(Vector3(-1.0f, -1.0f,  1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
 	//};
 
-	VertexMaster vertices[] =
-	{
-		VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-		VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-		VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-		VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-							
-		VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-		VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-		VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-		VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-
-		VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-		VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-		VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-		VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-
-		VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-		VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-		VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-		VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-
-		VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-		VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-		VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-		VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-
-		VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-		VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-		VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-		VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-	};
-
-	m_vertexBuffer = new VertexBuffer(ARRAYSIZE(vertices), sizeof(VertexMaster), vertices);
-	r->SetVertexBuffer(m_vertexBuffer);
-
-	//-----------------------------------------------------------------------------------------------
-	// Index buff creation
-	uint16 indices[] =
-	{
-		3,1,0,
-		2,1,3,
-
-		6,4,5,
-		7,4,6,
-
-		11,9,8,
-		10,9,11,
-
-		14,12,13,
-		15,12,14,
-
-		19,17,16,
-		18,17,19,
-
-		22,20,21,
-		23,20,22
-	};
-
-	m_indexBuffer = new IndexBuffer(ARRAYSIZE(indices), sizeof(uint16), indices);
-	r->SetIndexBuffer(m_indexBuffer);
 
 	//-----------------------------------------------------------------------------------------------
 	// Constant buffer
@@ -169,11 +155,7 @@ void Game::Render() const
 	Renderer* r = Renderer::GetInstance();
 	
 	r->SetActiveShader(r->m_testShader);
-
-	// Bind both sampler and texture to shader
 	r->SetActiveTexture(0, r->m_testTexture);
-
-	r->SetPrimitiveType(PRIMITIVE_TRIANGLES);
 
 	// draw big cube
 	TestConstantBuffer cb;
@@ -184,9 +166,8 @@ void Game::Render() const
 	r->UpdateConstantBuffer(m_constantBuffer, &cb);
 	r->SetConstantBuffer(0, m_constantBuffer);
 
-	r->m_deviceImmediateContext->DrawIndexed(36, 0, 0);        // 36 vertices needed for 12 triangles in a triangle list
-	
-															
+	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, ARRAYSIZE(vertices), vertices, ARRAYSIZE(indices), indices);
+														
 	// second cube
 	// seems we are just using the same mesh as the cube, just sticking it in another place
 	TestConstantBuffer cb2;
@@ -196,5 +177,5 @@ void Game::Render() const
 	
 	r->UpdateConstantBuffer(m_constantBuffer, &cb2);
 
-	r->m_deviceImmediateContext->DrawIndexed(36, 0, 0);														
+	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, ARRAYSIZE(vertices), vertices, ARRAYSIZE(indices), indices);
 }

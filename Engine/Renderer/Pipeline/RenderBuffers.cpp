@@ -12,13 +12,13 @@ static std::map<eBufferType,uint> bindFlagConverter =
 };
 
 //===============================================================================================
-RenderBuffer::RenderBuffer(eBufferType type, uint size, uint stride, void* bufferData /*= nullptr*/)
+RenderBuffer::RenderBuffer(eBufferType type, uint count, uint stride, void* bufferData /*= nullptr*/)
 {
 	m_type = type;
-	m_size = size;
+	m_count = count;
 	m_stride = stride;
 	
-	CreateBuffer(m_type, m_size, m_stride, bufferData);
+	CreateBuffer(m_type, m_count, m_stride, bufferData);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ RenderBuffer::~RenderBuffer()
 }
 
 //-----------------------------------------------------------------------------------------------
-void RenderBuffer::CreateBuffer(eBufferType type, uint size, uint stride, void* bufferData)
+void RenderBuffer::CreateBuffer(eBufferType type, uint count, uint stride, void* bufferData)
 {
 	HRESULT hr = S_OK;
 	Renderer* r = Renderer::GetInstance();
@@ -41,7 +41,7 @@ void RenderBuffer::CreateBuffer(eBufferType type, uint size, uint stride, void* 
 
 	D3D11_BUFFER_DESC bufferDescription = {};
 	bufferDescription.Usage = D3D11_USAGE_DEFAULT;
-	bufferDescription.ByteWidth = stride * size;
+	bufferDescription.ByteWidth = stride * count;
 	bufferDescription.BindFlags = bindFlagConverter[type];
 	bufferDescription.CPUAccessFlags = 0;
 

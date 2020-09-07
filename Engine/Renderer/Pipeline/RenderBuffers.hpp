@@ -23,26 +23,21 @@ enum eBufferType
 };
 
 //====================================================================================
-// Structs
-//====================================================================================
-
-
-//====================================================================================
 // Classes
 //====================================================================================
 class RenderBuffer
 {
 public:
-	RenderBuffer(eBufferType type, uint size, uint stride, void* bufferData);
+	RenderBuffer(eBufferType type, uint count, uint stride, void* bufferData);
 	
 	~RenderBuffer();
 
 private:
-	void CreateBuffer(eBufferType type, uint size, uint stride, void* bufferData);
+	void CreateBuffer(eBufferType type, uint count, uint stride, void* bufferData);
 
 public:
 	ID3D11Buffer*		m_buffer = nullptr;
-	uint				m_size = 0U;
+	uint				m_count = 0U;
 	uint				m_stride = 0U;
 
 	// idk why we would need this atm but I will need it for binding so setting it to the default
@@ -59,24 +54,24 @@ public:
 class VertexBuffer : public RenderBuffer
 {
 public:
-	VertexBuffer(uint size, uint stride, void* bufferData)
-		: RenderBuffer(BUFFER_TYPE_VERTEX, size,stride, bufferData) {}
+	VertexBuffer(uint count, uint stride, void* bufferData)
+		: RenderBuffer(BUFFER_TYPE_VERTEX, count, stride, bufferData) {}
 };
 
 //-----------------------------------------------------------------------------------------------
 class IndexBuffer : public RenderBuffer
 {
 public:
-	IndexBuffer(uint size, uint stride, void* bufferData)
-		: RenderBuffer(BUFFER_TYPE_INDEX, size, stride, bufferData) {}
+	IndexBuffer(uint count, uint stride, void* bufferData)
+		: RenderBuffer(BUFFER_TYPE_INDEX, count, stride, bufferData) {}
 };
 
 //-----------------------------------------------------------------------------------------------
 class ConstantBuffer : public RenderBuffer
 {
 public:
-	ConstantBuffer(uint size, uint stride, void* bufferData = nullptr)
-		: RenderBuffer(BUFFER_TYPE_CONSTANT, size, stride, bufferData) {}
+	ConstantBuffer(uint count, uint stride, void* bufferData = nullptr)
+		: RenderBuffer(BUFFER_TYPE_CONSTANT, count, stride, bufferData) {}
 };
 
 //====================================================================================

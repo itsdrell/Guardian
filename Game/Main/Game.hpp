@@ -11,8 +11,6 @@ using namespace DirectX;
 //====================================================================================
 // Forward Declare
 //====================================================================================
-class VertexBuffer;
-class IndexBuffer;
 class ConstantBuffer;
 
 //====================================================================================
@@ -50,9 +48,6 @@ public:
 	void Render() const;
 
 private:
-
-	VertexBuffer*			m_vertexBuffer = nullptr;
-	IndexBuffer*			m_indexBuffer = nullptr;
 	ConstantBuffer*			m_constantBuffer = nullptr;
 
 	XMMATRIX				m_bigCubeWorld;
