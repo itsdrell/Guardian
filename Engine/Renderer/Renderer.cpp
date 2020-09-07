@@ -14,6 +14,13 @@
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
 
+D3D_PRIMITIVE_TOPOLOGY PrimitiveTypeConverter[NUM_PRIMITIVE_TYPES] =
+{
+	D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
+	D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+	D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+};
+
 //===============================================================================================
 Renderer::Renderer()
 {
@@ -224,6 +231,12 @@ void Renderer::SetActiveShader(const Shader* theShader)
 												theShader->m_state->m_mask);
 
 	m_deviceImmediateContext->IASetInputLayout(theShader->m_program->m_vertexLayout);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetPrimitiveType(ePrimitiveType type)
+{
+	m_deviceImmediateContext->IASetPrimitiveTopology(PrimitiveTypeConverter[type]);
 }
 
 //-----------------------------------------------------------------------------------------------

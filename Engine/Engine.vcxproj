@@ -180,6 +180,7 @@
     <ClInclude Include="Renderer\Pipeline\Shader.hpp" />
     <ClInclude Include="Renderer\Pipeline\ShaderProgram.hpp" />
     <ClInclude Include="Renderer\Renderer.hpp" />
+    <ClInclude Include="Renderer\RenderTypes.hpp" />
     <ClInclude Include="ThirdParty\stbi\stb_image.h" />
     <ClInclude Include="ThirdParty\stbi\stb_image_write.h" />
   </ItemGroup>
@@ -203,6 +204,7 @@
     <ClCompile Include="Renderer\Pipeline\Shader.cpp" />
     <ClCompile Include="Renderer\Pipeline\ShaderProgram.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
+    <ClCompile Include="Renderer\RenderTypes.cpp" />
     <ClCompile Include="ThirdParty\stbi\stb_image.c" />
     <ClCompile Include="ThirdParty\stbi\stb_image_write.cpp" />
   </ItemGroup>

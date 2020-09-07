@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Core/General/EngineCommon.hpp"
+#include "Engine/Renderer/RenderTypes.hpp"
 
 //====================================================================================
 // Forward Declare
@@ -64,6 +65,7 @@ public:
 public:
 	void SetActiveTexture(int slot, const Texture* theTexture);
 	void SetActiveShader(const Shader* theShader);
+	void SetPrimitiveType(ePrimitiveType type);
 
 public:
 	void SetVertexBuffer(const VertexBuffer* buffer);
