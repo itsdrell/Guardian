@@ -115,7 +115,7 @@ void Game::Update(float ds)
 {
 	totalTime += ds;
 	
-	m_camera->m_cameraMatrix = Matrix44::MakeRotationDegreesAroundY(totalTime * 10);
+	m_bigCubeModel = Matrix44::MakeRotationDegreesAroundY(totalTime * 10);
 
 	depthPos += (.005f);
 
@@ -138,13 +138,10 @@ void Game::Render() const
 	r->SetActiveTexture(0, r->m_testTexture);
 	r->SetCamera(m_camera);
 
-	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, vertices.size(), vertices.data(), indices.size(), indices.data());
+	r->SetModel(m_bigCubeModel);
+	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, (uint) vertices.size(), vertices.data(), (uint) indices.size(), indices.data());
 														
 	// second cube
-	// seems we are just using the same mesh as the cube, just sticking it in another place
-
-	//m_camera->m_cameraMatrix = Matrix44::MakeTranposeOf(m_smallCubeModel);
-	//r->SetCamera(m_camera);
-
-	//r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, ARRAYSIZE(vertices), vertices, ARRAYSIZE(indices), indices);
+	r->SetModel(m_smallCubeModel);
+	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, (uint) vertices.size(), vertices.data(), (uint) indices.size(), indices.data());
 }

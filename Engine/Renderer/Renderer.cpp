@@ -54,6 +54,12 @@ Renderer::~Renderer()
 
 	delete m_tempImmediateVertexBuffer;
 	m_tempImmediateVertexBuffer = nullptr;
+
+	delete m_modelConstantBuffer;
+	m_modelConstantBuffer = nullptr;
+
+	delete m_cameraConstantBuffer;
+	m_cameraConstantBuffer = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -202,7 +208,11 @@ void Renderer::PostStartup()
 	m_testRenderState = new RenderState();
 	m_testShader = new Shader("TestShader", m_testShaderProgram, m_testRenderState);
 
-	m_cameraConstantBuffer = new ConstantBuffer(1, sizeof(CameraBufferData), &CameraBufferData());
+	CameraBufferData cb;
+	m_cameraConstantBuffer = new ConstantBuffer(1, sizeof(CameraBufferData), &cb);
+	
+	ModelBufferData mb;
+	m_modelConstantBuffer = new ConstantBuffer(1, sizeof(ModelBufferData), &mb);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -291,6 +301,17 @@ void Renderer::SetIndexBuffer(const IndexBuffer* buffer)
 void Renderer::SetConstantBuffer(uint slot, const ConstantBuffer* buffer)
 {
 	m_deviceImmediateContext->VSSetConstantBuffers(slot, 1, &buffer->m_buffer);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetModel(const Matrix44& modelMatrix)
+{
+	ModelBufferData cb;
+	cb.m_model = modelMatrix;
+
+	UpdateConstantBuffer(m_modelConstantBuffer, &cb);
+
+	SetConstantBuffer(MODEL_CONSTANT_BUFFER_SLOT, m_modelConstantBuffer);
 }
 
 //-----------------------------------------------------------------------------------------------

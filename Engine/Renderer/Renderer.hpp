@@ -68,6 +68,7 @@ public:
 	void SetActiveTexture(int slot, const Texture* theTexture);
 	void SetActiveShader(const Shader* theShader);
 	void SetPrimitiveType(ePrimitiveType type);
+	void SetModel(const Matrix44& modelMatrix);
 
 public:
 	void SetVertexBuffer(const VertexBuffer* buffer);
@@ -105,6 +106,7 @@ private:
 	IndexBuffer*			m_tempImmediateIndexBuffer = nullptr;
 	
 	ConstantBuffer*			m_cameraConstantBuffer = nullptr;
+	ConstantBuffer*			m_modelConstantBuffer = nullptr;
 
 public:
 	Texture*				m_testTexture = nullptr;

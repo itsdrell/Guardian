@@ -27,11 +27,17 @@ cbuffer ConstantBuffer : register(b0)
 }
 
 //--------------------------------------------------------------------------------------
+cbuffer ModelConstantBuffer : register(b1)
+{
+	matrix Model;
+}
+
+//--------------------------------------------------------------------------------------
 PS_INPUT main(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
 	
-	output.Pos = mul(World, input.Pos);
+	output.Pos = mul(Model, input.Pos);
 	output.Pos = mul(View, output.Pos);
 	output.Pos = mul(Projection, output.Pos);
 
