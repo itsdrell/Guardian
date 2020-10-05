@@ -19,6 +19,7 @@ struct ID3D11DepthStencilView;
 struct ID3D11Texture2D;
 
 class Texture;
+class Camera;
 class ShaderProgram;
 class Shader;
 class RenderState;
@@ -63,6 +64,7 @@ public:
 	void EndFrame();
 
 public:
+	void SetCamera(Camera* theCamera);
 	void SetActiveTexture(int slot, const Texture* theTexture);
 	void SetActiveShader(const Shader* theShader);
 	void SetPrimitiveType(ePrimitiveType type);
@@ -76,6 +78,9 @@ public:
 
 public:
 	void DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMaster* vertices, uint indexCount, Indices* indicies);
+
+private:
+	void BindCameraToShader(const Camera& theCamera);
 
 private:
 	static Renderer* s_renderer;
@@ -98,12 +103,16 @@ private:
 private:
 	VertexBuffer*			m_tempImmediateVertexBuffer = nullptr;
 	IndexBuffer*			m_tempImmediateIndexBuffer = nullptr;
+	
+	ConstantBuffer*			m_cameraConstantBuffer = nullptr;
 
 public:
 	Texture*				m_testTexture = nullptr;
 	ShaderProgram*			m_testShaderProgram = nullptr;
 	Shader*					m_testShader = nullptr;
 	RenderState*			m_testRenderState = nullptr;
+
+	Camera*					m_currentCamera = nullptr;
 };
 
 //====================================================================================

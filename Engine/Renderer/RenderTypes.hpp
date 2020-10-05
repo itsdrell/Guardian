@@ -3,6 +3,7 @@
 #include "Engine/Math/Vectors/Vector3.hpp"
 #include "Engine/Math/Vectors/Vector4.hpp"
 #include "Engine/Math/Vectors/Vector2.hpp"
+#include "Engine/Math/Matrices/Matrix44.hpp"
 
 //====================================================================================
 // Forward Declare
@@ -25,6 +26,13 @@ enum ePrimitiveType
 	NUM_PRIMITIVE_TYPES
 };
 
+//-----------------------------------------------------------------------------------------------
+enum RENDER_CONSTANT_BUFFER_SLOTS
+{
+	MODEL_CONSTANT_BUFFER_SLOT = 1,
+	CAMERA_CONSTANT_BUFFER_SLOT = 0,
+};
+
 //====================================================================================
 // Structs
 //====================================================================================
@@ -38,6 +46,15 @@ struct VertexMaster
 	Vector3 pos;
 	Vector4	color; // normalized
 	Vector2 uv;
+};
+
+//-----------------------------------------------------------------------------------------------
+// TODO PUT MODEL IN ITS OWN
+struct CameraBufferData
+{
+	Matrix44	m_world;
+	Matrix44	m_view;
+	Matrix44	m_projection;
 };
 
 

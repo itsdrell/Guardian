@@ -10,6 +10,7 @@
 #include "Engine/Renderer/Pipeline/Shader.hpp"
 #include "Engine/Renderer/Pipeline/RenderState.hpp"
 #include "Engine/Renderer/Pipeline/RenderBuffers.hpp"
+#include "Engine/Core/General/Camera.hpp"
 
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
@@ -200,6 +201,8 @@ void Renderer::PostStartup()
 	m_testShaderProgram = new ShaderProgram("TestVertShader", "TestPixelShader");
 	m_testRenderState = new RenderState();
 	m_testShader = new Shader("TestShader", m_testShaderProgram, m_testRenderState);
+
+	m_cameraConstantBuffer = new ConstantBuffer(1, sizeof(CameraBufferData), &CameraBufferData());
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -217,6 +220,33 @@ void Renderer::BeginFrame()
 void Renderer::EndFrame()
 {
 	m_swapChain->Present(0, 0);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::SetCamera(Camera* theCamera)
+{
+	if(m_currentCamera == nullptr)
+	{
+		// change current camera to default?
+	}
+
+	// do something with the framebuffer?
+
+	m_currentCamera = theCamera;
+	BindCameraToShader(*theCamera);
+}
+
+//-----------------------------------------------------------------------------------------------
+void Renderer::BindCameraToShader(const Camera& theCamera)
+{
+	CameraBufferData cb;
+	cb.m_world = theCamera.m_cameraMatrix;
+	cb.m_view = theCamera.m_viewMatrix;
+	cb.m_projection = theCamera.m_projectionMatrix;
+
+	UpdateConstantBuffer(m_cameraConstantBuffer, &cb);
+	
+	SetConstantBuffer(CAMERA_CONSTANT_BUFFER_SLOT, m_cameraConstantBuffer);
 }
 
 //-----------------------------------------------------------------------------------------------

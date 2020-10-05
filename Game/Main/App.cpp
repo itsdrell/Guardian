@@ -1,3 +1,5 @@
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include "App.hpp"
 #include "Game/Main/Game.hpp"
 #include "Engine/Renderer/Renderer.hpp"

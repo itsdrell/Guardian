@@ -1,17 +1,12 @@
 #pragma once
-#include <windows.h>
-#include <d3d11_1.h>
-#include <directxcolors.h>
-
+#include "Engine/Math/Matrices/Matrix44.hpp"
 #include <string>
 #include <vector>
-
-using namespace DirectX;
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
-class ConstantBuffer;
+class Camera;
 
 //====================================================================================
 // Type Defs + Defines
@@ -26,12 +21,6 @@ class ConstantBuffer;
 //====================================================================================
 // Structs
 //====================================================================================
-struct TestConstantBuffer
-{
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
-};
 
 //====================================================================================
 // Classes
@@ -48,13 +37,10 @@ public:
 	void Render() const;
 
 private:
-	ConstantBuffer*			m_constantBuffer = nullptr;
+	Matrix44				m_bigCubeModel;
+	Matrix44				m_smallCubeModel;
 
-	XMMATRIX				m_bigCubeWorld;
-	XMMATRIX				m_smallCubeWorld;
-
-	XMMATRIX				m_view;
-	XMMATRIX				m_projection;				
+	Camera*					m_camera;
 };
 
 //====================================================================================

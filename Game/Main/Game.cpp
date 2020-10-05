@@ -1,25 +1,18 @@
 #include "Game.hpp"
 #include "Engine/Core/Platform/Window.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-#include "Engine/Renderer/Images/Texture.hpp"
-#include "Engine/Renderer/Pipeline/ShaderProgram.hpp"
-#include "Engine/Renderer/Pipeline/RenderBuffers.hpp"
-#include "Engine/Renderer/RenderTypes.hpp"
 
-#include <iostream>
-#include <stdio.h>
-#include <fstream>
-
-#include <directxmath.h>
 #include "Engine/Math/Vectors/Vector2.hpp"
-#include "Engine/ThirdParty/stbi/stb_image.h"
+#include "Engine/Math/MathUtils.hpp"
+#include "Engine/Core/General/Camera.hpp"
 
 static float depthPos = -4.5f;
+static float totalTime = 0.f;
 
 //===============================================================================================
 Game* g_theGame = nullptr;
 //===============================================================================================
-VertexMaster vertices[] =
+std::vector<VertexMaster> vertices =
 {
 	VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
 	VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
@@ -52,7 +45,7 @@ VertexMaster vertices[] =
 	VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
 };
 
-uint16 indices[] =
+std::vector<uint16> indices =
 {
 	3,1,0,
 	2,1,3,
@@ -84,8 +77,8 @@ Game::Game()
 //-----------------------------------------------------------------------------------------------
 Game::~Game()
 {
-	delete m_constantBuffer;
-	m_constantBuffer = nullptr;
+	delete m_camera;
+	m_camera = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -107,46 +100,33 @@ void Game::StartUp()
 	//	Vertex(Vector3(-1.0f, -1.0f,  1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
 	//};
 
+	Vector3 eye = Vector3(0.f, 1.0f, -5.0f);
+	Vector3 targetPos = Vector3(0.0f, 1.0f, 0.0f);
+	Vector3 up = Vector3(0.0f, 1.0f, 0.f);
 
-	//-----------------------------------------------------------------------------------------------
-	// Constant buffer
-	// giving it a default constant buffer
-	m_constantBuffer = new ConstantBuffer(1, sizeof(TestConstantBuffer), &TestConstantBuffer());
+	Matrix44 view = Matrix44::LookAt(eye, targetPos, up);
+	Matrix44 projection = Matrix44::MakePerspectiveProjection(45, theWindow->GetAspect(), .01f, 100.f);
 
-	// init the constant variable
-	m_bigCubeWorld = XMMatrixIdentity();
-	m_smallCubeWorld = XMMatrixIdentity();
-
-	// Initialize the view matrix
-	XMVECTOR Eye = XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
-	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	m_view = XMMatrixLookAtLH(Eye, At, Up);
-
-	// Initialize the projection matrix
-	m_projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, theWindow->GetAspect(), 0.01f, 100.0f);
+	m_camera = new Camera(Matrix44(), view, projection);
 }
 
 //-----------------------------------------------------------------------------------------------
 void Game::Update(float ds)
 {
-	static float t = 0.0f;
-	static ULONGLONG timeStart = 0;
-	ULONGLONG timeCur = GetTickCount64();
-	if (timeStart == 0)
-		timeStart = timeCur;
-	t = (timeCur - timeStart) / 1000.0f;
+	totalTime += ds;
 	
-	m_bigCubeWorld = XMMatrixRotationY(t);
+	m_camera->m_cameraMatrix = Matrix44::MakeRotationDegreesAroundY(totalTime * 10);
 
 	depthPos += (.005f);
 
 	// 2nd Cube:  Rotate around origin
-	XMMATRIX mSpin = XMMatrixRotationZ(-t); //t
-	XMMATRIX mOrbit = XMMatrixRotationY(-t * 2.0f); //-t * 2.0f
-	XMMATRIX mTranslate = XMMatrixTranslation(0.0f, 1.0f, depthPos);
-	XMMATRIX mScale = XMMatrixScaling(0.3f, 0.3f, 0.3f);
-	m_smallCubeWorld = mScale * mSpin * mTranslate * mOrbit;
+	Matrix44 spin = Matrix44::MakeRotationDegreesAroundZ(-totalTime);
+	Matrix44 orbit = Matrix44::MakeRotationDegreesAroundY(-totalTime * 2.0f);
+	Matrix44 translate = Matrix44::MakeTranslation3D(Vector3(0.0f, 1.0f, depthPos));
+	m_smallCubeModel = Matrix44();
+	m_smallCubeModel.Append(orbit);
+	m_smallCubeModel.Append(translate);
+	m_smallCubeModel.Append(spin);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -156,26 +136,15 @@ void Game::Render() const
 	
 	r->SetActiveShader(r->m_testShader);
 	r->SetActiveTexture(0, r->m_testTexture);
+	r->SetCamera(m_camera);
 
-	// draw big cube
-	TestConstantBuffer cb;
-	cb.mWorld = XMMatrixTranspose(m_bigCubeWorld);
-	cb.mView = XMMatrixTranspose(m_view);
-	cb.mProjection = XMMatrixTranspose(m_projection);
-
-	r->UpdateConstantBuffer(m_constantBuffer, &cb);
-	r->SetConstantBuffer(0, m_constantBuffer);
-
-	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, ARRAYSIZE(vertices), vertices, ARRAYSIZE(indices), indices);
+	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, vertices.size(), vertices.data(), indices.size(), indices.data());
 														
 	// second cube
 	// seems we are just using the same mesh as the cube, just sticking it in another place
-	TestConstantBuffer cb2;
-	cb2.mWorld = XMMatrixTranspose(m_smallCubeWorld);
-	cb2.mView = XMMatrixTranspose(m_view);
-	cb2.mProjection = XMMatrixTranspose(m_projection);
-	
-	r->UpdateConstantBuffer(m_constantBuffer, &cb2);
 
-	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, ARRAYSIZE(vertices), vertices, ARRAYSIZE(indices), indices);
+	//m_camera->m_cameraMatrix = Matrix44::MakeTranposeOf(m_smallCubeModel);
+	//r->SetCamera(m_camera);
+
+	//r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, ARRAYSIZE(vertices), vertices, ARRAYSIZE(indices), indices);
 }

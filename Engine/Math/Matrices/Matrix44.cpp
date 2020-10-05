@@ -1,5 +1,7 @@
 #include "Matrix44.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
+#include <corecrt_math.h> // tanf
 
 //===============================================================================================
 Matrix44::Matrix44()
@@ -29,6 +31,76 @@ Matrix44::Matrix44(const float* sixteenValuesBasisMajor)
 	Ty = sixteenValuesBasisMajor[13];
 	Tz = sixteenValuesBasisMajor[14];
 	Tw = sixteenValuesBasisMajor[15];
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44::Matrix44(const Vector3& iBasis, const Vector3& jBasis, const Vector3& kBasis, const Vector3& translation /*= Vector3(0.f, 0.f, 0.f)*/)
+{
+	SetIdentity();
+
+	Ix = iBasis.x;
+	Iy = iBasis.y;
+	Iz = iBasis.z;
+
+	Jx = jBasis.x;
+	Jy = jBasis.y;
+	Jz = jBasis.z;
+
+	Kx = kBasis.x;
+	Ky = kBasis.y;
+	Kz = kBasis.z;
+
+	Tx = translation.x;
+	Ty = translation.y;
+	Tz = translation.z;
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44::Matrix44(const Vector4& iBasis, const Vector4& jBasis, const Vector4& kBasis, const Vector4& translation)
+{
+	Ix = iBasis.x;
+	Iy = iBasis.y;
+	Iz = iBasis.z;
+	Iw = iBasis.w;
+
+	Jx = jBasis.x;
+	Jy = jBasis.y;
+	Jz = jBasis.z;
+	Jw = jBasis.w;
+
+	Kx = kBasis.x;
+	Ky = kBasis.y;
+	Kz = kBasis.z;
+	Kw = kBasis.w;
+
+	Tx = translation.x;
+	Ty = translation.y;
+	Tz = translation.z;
+	Tw = translation.w;
+}
+
+//-----------------------------------------------------------------------------------------------
+void Matrix44::operator=(const Matrix44& copyOf)
+{
+	Ix = copyOf.Ix;
+	Iy = copyOf.Iy;
+	Iz = copyOf.Iz;
+	Iw = copyOf.Iw;
+
+	Jx = copyOf.Jx;
+	Jy = copyOf.Jy;
+	Jz = copyOf.Jz;
+	Jw = copyOf.Jw;
+
+	Kx = copyOf.Kx;
+	Ky = copyOf.Ky;
+	Kz = copyOf.Kz;
+	Kw = copyOf.Kw;
+
+	Tx = copyOf.Tx;
+	Ty = copyOf.Ty;
+	Tz = copyOf.Tz;
+	Tw = copyOf.Tw;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -78,6 +150,97 @@ void Matrix44::Translate2D(const Vector2& translation)
 }
 
 //-----------------------------------------------------------------------------------------------
+// if called first, this becomes row major
+void Matrix44::Transpose()
+{
+	Matrix44 matrixToInverse = Matrix44(*this);
+
+	//Iy = matrixToInverse.Jx;
+	//Iz = matrixToInverse.Kx;
+	//
+	//Jx = matrixToInverse.Iy;
+	//Jz = matrixToInverse.Ky;
+	//
+	//Kx = matrixToInverse.Iz;
+	//Ky = matrixToInverse.Jz;
+
+	Iy = matrixToInverse.Jx;
+	Jx = matrixToInverse.Iy;
+
+	Iz = matrixToInverse.Kx;
+	Kx = matrixToInverse.Iz;
+
+	Iw = matrixToInverse.Tx;
+	Tx = matrixToInverse.Iw;
+
+	Jz = matrixToInverse.Ky;
+	Ky = matrixToInverse.Jz;
+
+	Jw = matrixToInverse.Ty;
+	Ty = matrixToInverse.Jw;
+
+	Kw = matrixToInverse.Tz;
+	Tz = matrixToInverse.Kw;
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::MakeRotationDegreesAroundZ(float rotationDegrees)
+{
+	return MakeRotationDegrees2D(rotationDegrees);
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::MakeRotationDegreesAroundY(float rotationDegrees)
+{
+	//https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+
+	Matrix44 result;
+
+	float cosValue = CosDegrees(rotationDegrees);
+	float sinValue = SinDegrees(rotationDegrees);
+
+	result.Ix = cosValue;
+	result.Iz = -sinValue;
+	result.Kx = sinValue;
+	result.Kz = cosValue;
+
+	return result;
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::MakeRotationDegreesAroundX(float rotationDegrees)
+{
+	// https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+	Matrix44 result;
+
+	float cosValue = CosDegrees(rotationDegrees);
+	float sinValue = SinDegrees(rotationDegrees);
+
+	result.Jy = cosValue;
+	result.Jz = sinValue;
+	result.Ky = -sinValue;
+	result.Kz = cosValue;
+
+	return result;
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::MakeRotationDegrees2D(float rotationDegreesAboutZ)
+{
+	Matrix44 result;
+
+	float cosValue = CosDegrees(rotationDegreesAboutZ);
+	float sinValue = SinDegrees(rotationDegreesAboutZ);
+
+	result.Ix = cosValue;
+	result.Iy = sinValue;
+	result.Jx = -sinValue;
+	result.Jy = cosValue;
+
+	return result;
+}
+
+//-----------------------------------------------------------------------------------------------
 Matrix44 Matrix44::MakeOrtho2D(const Vector2 & mins, const Vector2 & maxs)
 {
 	Matrix44 result = Matrix44(); // Get Identity 
@@ -106,6 +269,18 @@ Matrix44 Matrix44::MakeTranslation2D(const Vector2& translation)
 }
 
 //-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::MakeTranslation3D(const Vector3& translation)
+{
+	Matrix44 result;
+
+	result.Tx = translation.x;
+	result.Ty = translation.y;
+	result.Tz = translation.z;
+
+	return result;
+}
+
+//-----------------------------------------------------------------------------------------------
 Matrix44 Matrix44::MakeOrtho3D(const Vector3& mins, const Vector3& maxs)
 {
 	Matrix44 result = Matrix44(); // Get Identity 
@@ -122,5 +297,46 @@ Matrix44 Matrix44::MakeOrtho3D(const Vector3& mins, const Vector3& maxs)
 	result.Tw = 1.f;
 
 	// The rest are all zeros
+	return result;
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::LookAt(const Vector3& pos, const Vector3& target, Vector3 up /*= Vector3(0.f, 1.f, 0.f)*/)
+{
+	Vector3 direction = target - pos;
+	Vector3 forward = Normalize(direction); // direction.Normalize();
+	Vector3 right = Cross(up, forward);
+	Vector3 normalizeRight = Normalize(right); //right.Normalize();
+	Vector3 newUp = Cross(forward, normalizeRight);
+
+	// this may be wrong
+	Vector3 targetPos = Vector3(-pos.x, -pos.y, -pos.z);
+
+	// Create a matrix
+	return Matrix44(normalizeRight, newUp, forward, targetPos);
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::MakePerspectiveProjection(float fov_degrees, float aspect, float nz, float fz)
+{
+	float d = 1.0f / tanf(ConvertDegreesToRadians(fov_degrees));
+	float q = 1.0f / (fz - nz);
+
+	Vector4 i = Vector4(d / aspect, 0, 0, 0);
+	Vector4 j = Vector4(0, d, 0, 0);
+	Vector4 k = Vector4(0, 0, (nz + fz) * q, 1.f);
+	Vector4 t = Vector4(0, 0, -2.0f * nz * fz * q, 0);
+
+	Matrix44 result = Matrix44(i, j, k, t);
+
+	return result;
+}
+
+//-----------------------------------------------------------------------------------------------
+Matrix44 Matrix44::MakeTranposeOf(const Matrix44& matrix)
+{
+	Matrix44 result = matrix;
+	result.Transpose();
+
 	return result;
 }
