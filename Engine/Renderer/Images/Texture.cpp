@@ -1,7 +1,8 @@
 #include "Texture.hpp"
 #include "Engine/ThirdParty/stbi/stb_image.h"
-#include <d3d11_1.h>
 #include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Renderer/Images/Image.hpp"
+#include <d3d11_1.h>
 
 //===============================================================================================
 Texture::Texture(const String& path)
@@ -14,6 +15,12 @@ Texture::Texture(const String& path)
 	PopulateFromData(imageData, numberOfComponents);
 
 	stbi_image_free(imageData);
+}
+
+//-----------------------------------------------------------------------------------------------
+Texture::Texture()
+{
+	m_dimensions = IntVector2(0, 0);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -73,5 +80,17 @@ void Texture::PopulateFromData(unsigned char* imageData, int numberOfComponents)
 
 	// Create the sampler
 	hr = r->m_deviceInterface->CreateSamplerState(&sampleDescription, &m_textureSampler);
+}
+
+//-----------------------------------------------------------------------------------------------
+Texture* Texture::CreateFromImage(const Image& theImage)
+{
+	m_dimensions = theImage.m_dimensions;
+
+	// The image class calls the flip command so we don't have to worry about it!
+	unsigned char* imageBuffer = theImage.GetColorCharPointer();
+	PopulateFromData((unsigned char*)imageBuffer, 4);
+
+	return this;
 }
 

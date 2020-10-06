@@ -75,5 +75,6 @@ void Game::Render() const
 
 	// second cube
 	r->SetModel(m_smallCubeModel);
-	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f));
+	r->SetActiveTexture(0, r->m_defaultTexture);
+	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), r->m_defaultTexture, Rgba::YELLOW);
 }

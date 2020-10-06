@@ -5,12 +5,14 @@
 
 #include "Renderer.hpp"
 #include "Engine/Renderer/Images/Texture.hpp"
+#include "Engine/Renderer/Images/Image.hpp"
 #include "Engine/Core/Platform/Window.hpp"
 #include "Engine/Renderer/Pipeline/ShaderProgram.hpp"
 #include "Engine/Renderer/Pipeline/Shader.hpp"
 #include "Engine/Renderer/Pipeline/RenderState.hpp"
 #include "Engine/Renderer/Pipeline/RenderBuffers.hpp"
 #include "Engine/Core/General/Camera.hpp"
+#include "Engine/Core/General/Rgba.hpp"
 
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
@@ -207,6 +209,9 @@ void Renderer::PostStartup()
 	m_testShaderProgram = new ShaderProgram("TestVertShader", "TestPixelShader");
 	m_testRenderState = new RenderState();
 	m_testShader = new Shader("TestShader", m_testShaderProgram, m_testRenderState);
+
+	m_defaultTexture = new Texture(); //CreateOrGetTexture("Data/Images/defaultTexture.png");
+	m_defaultTexture = m_defaultTexture->CreateFromImage(Image("defaultTexture", IntVector2(8, 8), Rgba(255, 255, 255, 255)));
 
 	CameraBufferData cb;
 	m_cameraConstantBuffer = new ConstantBuffer(1, sizeof(CameraBufferData), &cb);

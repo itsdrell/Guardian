@@ -1,15 +1,12 @@
 #pragma once
-#include "Engine/Core/General/EngineCommon.hpp"
 #include "Engine/Math/Vectors/IntVector2.hpp"
+#include "Engine/Core/General/Rgba.hpp"
+#include "Engine/Core/General/EngineCommon.hpp"
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
-struct ID3D11Texture2D;
-struct ID3D11ShaderResourceView;
-struct ID3D11SamplerState;
 
-class Image;
 
 //====================================================================================
 // Type Defs + Defines
@@ -29,32 +26,20 @@ class Image;
 //====================================================================================
 // Classes
 //====================================================================================
-class Texture
+class Image
 {
-	// maybe change this to an asset manager later?
-	friend class Renderer;
+public:
+	~Image();
+	Image();
+	Image(const String& name, const IntVector2& dimension, const Rgba& color);
 
 public:
-	Texture();
-	Texture(const String& path);
-	~Texture();
-
-private:
-	void PopulateFromData(unsigned char* imageData, int numberOfComponents);
-
-private:
-	Texture* CreateFromImage(const Image& theImage);
+	unsigned char* GetColorCharPointer() const;
 
 public:
-	IntVector2	m_dimensions;
-
-// should be private once we add methods to create and get in renderer
-public:
-	ID3D11Texture2D*			m_texture = nullptr;
-	ID3D11ShaderResourceView*	m_textureView = nullptr;
-
-	// Make this a Sampler class?
-	ID3D11SamplerState*			m_textureSampler = nullptr;
+	String							m_path;
+	IntVector2						m_dimensions;
+	std::vector<Rgba>				m_colors;
 };
 
 //====================================================================================
@@ -68,5 +53,5 @@ public:
 
 
 //====================================================================================
-// Written by Zachary Bracken : [8/22/2020]
+// Written by Zachary Bracken : [10/6/2020]
 //====================================================================================

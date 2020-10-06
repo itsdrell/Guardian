@@ -109,6 +109,7 @@ private:
 	ConstantBuffer*			m_modelConstantBuffer = nullptr;
 
 public:
+	Texture*				m_defaultTexture = nullptr;
 	Texture*				m_testTexture = nullptr;
 	ShaderProgram*			m_testShaderProgram = nullptr;
 	Shader*					m_testShader = nullptr;
