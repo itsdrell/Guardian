@@ -21,11 +21,28 @@ RenderState::RenderState()
 	BlendState.RenderTarget[0].RenderTargetWriteMask = 0x0f;
 
 	r->m_deviceInterface->CreateBlendState(&BlendState, &m_blendState);
+
+	SetRasterizerState();
 }
 
 //-----------------------------------------------------------------------------------------------
 RenderState::~RenderState()
 {
 	if (m_blendState) { m_blendState->Release(); }
+	if (m_rasterationState) { m_rasterationState->Release(); }
+}
+
+//-----------------------------------------------------------------------------------------------
+void RenderState::SetRasterizerState()
+{
+	Renderer* r = Renderer::GetInstance();
+	
+	D3D11_RASTERIZER_DESC wfdesc;
+	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
+	wfdesc.CullMode = ToDx11CullMode(m_cullMode);
+	wfdesc.FillMode = ToDx11FillMode(m_fillMode);
+
+	HRESULT hr = r->m_deviceInterface->CreateRasterizerState(&wfdesc, &m_rasterationState);
+	r->m_deviceImmediateContext->RSSetState(m_rasterationState);
 }
 

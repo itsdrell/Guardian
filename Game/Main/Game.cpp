@@ -66,15 +66,17 @@ void Game::Render() const
 {
 	Renderer* r = Renderer::GetInstance();
 	
-	r->SetActiveShader(r->m_testShader);
-	r->SetActiveTexture(0, r->m_testTexture);
 	r->SetCamera(m_camera);
 
+	r->SetActiveShader(r->m_testShader);
 	r->SetModel(m_bigCubeModel);
-	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(2.f, 2.f, 2.f));
+	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(2.f, 2.f, 2.f), r->m_testTexture);
+
+	r->SetActiveShader(r->m_wireFrameShader);
+	r->SetModel(Matrix44());
+	g_draw->Cube(Vector3(-3.f, 0.f, -1.f), Vector3(1.f, 1.f, 1.f), r->m_defaultTexture, Rgba::WHITE);
 
 	// second cube
 	r->SetModel(m_smallCubeModel);
-	r->SetActiveTexture(0, r->m_defaultTexture);
 	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), r->m_defaultTexture, Rgba::YELLOW);
 }

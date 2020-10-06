@@ -207,8 +207,12 @@ void Renderer::PostStartup()
 	m_testTexture = new Texture("Data/Images/Test_StbiAndDirectX.png");
 	
 	m_testShaderProgram = new ShaderProgram("TestVertShader", "TestPixelShader");
-	m_testRenderState = new RenderState();
-	m_testShader = new Shader("TestShader", m_testShaderProgram, m_testRenderState);
+	RenderState* testRenderState = new RenderState();
+	m_testShader = new Shader("TestShader", m_testShaderProgram, testRenderState);
+
+	RenderState* wireFrameRenderState = new RenderState();
+	wireFrameRenderState->m_fillMode = FILLMODE_WIRE;
+	m_wireFrameShader = new Shader("WireFrame", m_testShaderProgram, wireFrameRenderState);
 
 	m_defaultTexture = new Texture(); //CreateOrGetTexture("Data/Images/defaultTexture.png");
 	m_defaultTexture = m_defaultTexture->CreateFromImage(Image("defaultTexture", IntVector2(8, 8), Rgba(255, 255, 255, 255)));
@@ -282,6 +286,8 @@ void Renderer::SetActiveShader(const Shader* theShader)
 												theShader->m_state->m_mask);
 
 	m_deviceImmediateContext->IASetInputLayout(theShader->m_program->m_vertexLayout);
+
+	theShader->m_state->SetRasterizerState();
 }
 
 //-----------------------------------------------------------------------------------------------

@@ -1,10 +1,12 @@
 #pragma once
 #include "Engine/Core/General/EngineCommon.hpp"
+#include "Engine/Renderer/RenderTypes.hpp"
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
 struct ID3D11BlendState;
+struct ID3D11RasterizerState;
 
 //====================================================================================
 // Type Defs + Defines
@@ -26,18 +28,25 @@ struct ID3D11BlendState;
 //====================================================================================
 class RenderState
 {
-
 public:
-
 	// Making a default one for now, later we need to add on to this
 	RenderState();
 	~RenderState();
 
 public:
+	void SetRasterizerState(); // updates resource on gpu
+
+public:
 	float	m_blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	uint	m_mask = 0xffffffff;
 
+public:
+	eCullMode	m_cullMode = CULLMODE_BACK;
+	eFillMode	m_fillMode = FILLMODE_SOLID;
+
+public:
 	ID3D11BlendState*		m_blendState = nullptr;
+	ID3D11RasterizerState*	m_rasterationState = nullptr;
 };
 
 //====================================================================================

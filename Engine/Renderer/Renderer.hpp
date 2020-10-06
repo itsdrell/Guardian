@@ -86,7 +86,7 @@ private:
 private:
 	static Renderer* s_renderer;
 
-public:
+private:
 	ID3D11Device*			m_deviceInterface = nullptr;              // the device interface
 	ID3D11Device1*			m_deviceInterfaceOne = nullptr;              // This might be able to just be a temp variable??
 
@@ -111,11 +111,18 @@ private:
 public:
 	Texture*				m_defaultTexture = nullptr;
 	Texture*				m_testTexture = nullptr;
+
 	ShaderProgram*			m_testShaderProgram = nullptr;
 	Shader*					m_testShader = nullptr;
-	RenderState*			m_testRenderState = nullptr;
+	Shader*					m_wireFrameShader = nullptr;
 
 	Camera*					m_currentCamera = nullptr;
+
+	// these need the device interface/context
+	friend class Texture;
+	friend class RenderBuffer;
+	friend class RenderState;
+	friend class ShaderProgram;
 };
 
 //====================================================================================

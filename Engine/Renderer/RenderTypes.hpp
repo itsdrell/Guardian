@@ -8,7 +8,8 @@
 //====================================================================================
 // Forward Declare
 //====================================================================================
-
+enum D3D11_CULL_MODE;
+enum D3D11_FILL_MODE;
 
 //====================================================================================
 // Type Defs + Defines
@@ -25,6 +26,23 @@ enum ePrimitiveType
 	PRIMITIVE_TRIANGLES,		// in d3d11, for example, this becomes D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	NUM_PRIMITIVE_TYPES
 };
+
+//-----------------------------------------------------------------------------------------------
+enum eCullMode
+{
+	CULLMODE_BACK,          // D3D11_CULL_BACK 
+	CULLMODE_FRONT,         // D3D11_CULL_FRONT
+	CULLMODE_NONE           // D3D11_CULL_NONE 
+};
+D3D11_CULL_MODE ToDx11CullMode(eCullMode mode);
+
+//-----------------------------------------------------------------------------------------------
+enum eFillMode
+{
+	FILLMODE_SOLID,         // D3D11_FILL_SOLID
+	FILLMODE_WIRE           // D3D11_FILL_WIREFRAME
+};
+D3D11_FILL_MODE ToDx11FillMode(eFillMode mode);
 
 //-----------------------------------------------------------------------------------------------
 enum RENDER_CONSTANT_BUFFER_SLOTS
