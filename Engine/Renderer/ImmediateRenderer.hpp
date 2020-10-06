@@ -1,9 +1,13 @@
 #pragma once
+#include "Engine/Math/Vectors/Vector2.hpp"
+#include "Engine/Core/General/Rgba.hpp"
 
 //====================================================================================
 // Forward Declare
 //====================================================================================
-class Vector4;
+class Renderer;
+class Vector3;
+class Texture;
 
 //====================================================================================
 // Type Defs + Defines
@@ -18,43 +22,32 @@ class Vector4;
 //====================================================================================
 // Structs
 //====================================================================================
+struct Rect
+{
+	Rect(Vector2 start, Vector2 end);
+	~Rect() {};
 
+	const static Rect ZERO_TO_ONE;
+
+	Vector2 p0;
+	Vector2 p1;
+};
 
 //====================================================================================
 // Classes
 //====================================================================================
-class Rgba
+class ImmediateRenderer
 {
 public:
-	Rgba();
-	Rgba(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha = 255);
+	ImmediateRenderer(Renderer* theRenderer);
 
 public:
-	bool operator==(const Rgba& compare) const;
+	void Cube(const Vector3& center, const Vector3& dimensions, Texture* textureToUse = nullptr, const Rgba &color = Rgba::WHITE,
+		Rect uv_top = Rect::ZERO_TO_ONE, Rect uv_side = Rect::ZERO_TO_ONE, Rect uv_bottom = Rect::ZERO_TO_ONE);
 
-public:
-	Vector4 GetAsNormalizedVector4() const;
-
-public:
-	static const Rgba WHITE;
-	static const Rgba BLACK;
-	static const Rgba CYAN;
-	static const Rgba MAGENTA;
-
-
-	static const Rgba RED;
-	static const Rgba ORANGE;
-	static const Rgba YELLOW;
-	static const Rgba GREEN;
-	static const Rgba BLUE;
-	static const Rgba INDIGO;
-	static const Rgba VIOLET;
-
-public:
-	// 0 - 255
-	unsigned char r,g,b,a = 255;
+private:
+	Renderer*	m_renderer = nullptr;
 };
-
 
 //====================================================================================
 // Standalone C Functions
@@ -64,8 +57,8 @@ public:
 //====================================================================================
 // Externs
 //====================================================================================
-
+extern ImmediateRenderer* g_draw;
 
 //====================================================================================
-// Written by Zachary Bracken : [1/29/2019]
+// Written by Zachary Bracken : [10/5/2020]
 //====================================================================================

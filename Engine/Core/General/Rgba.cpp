@@ -3,6 +3,20 @@
 #include "Engine/Math/MathUtils.hpp"
 
 //===============================================================================================
+const Rgba Rgba::WHITE = Rgba(255, 255, 255, 255);
+const Rgba Rgba::BLACK = Rgba(0, 0, 0, 255);
+const Rgba Rgba::CYAN = Rgba(0, 255, 255, 255);
+const Rgba Rgba::MAGENTA = Rgba(255, 0, 255);
+const Rgba Rgba::RED = Rgba(255, 0, 0, 255);
+const Rgba Rgba::YELLOW = Rgba(255, 255, 0, 255);
+const Rgba Rgba::GREEN = Rgba(0, 255, 0, 255);
+const Rgba Rgba::BLUE = Rgba(0, 0, 255, 255);
+
+const Rgba Rgba::ORANGE = Rgba(255, 165, 0, 255);
+const Rgba Rgba::INDIGO = Rgba(75, 0, 130, 255);
+const Rgba Rgba::VIOLET = Rgba(138, 43, 226, 255);
+
+//===============================================================================================
 Rgba::Rgba()
 {
 }

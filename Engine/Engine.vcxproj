@@ -175,6 +175,7 @@
     <ClInclude Include="Math\Vectors\Vector3.hpp" />
     <ClInclude Include="Math\Vectors\Vector4.hpp" />
     <ClInclude Include="Renderer\Images\Texture.hpp" />
+    <ClInclude Include="Renderer\ImmediateRenderer.hpp" />
     <ClInclude Include="Renderer\Pipeline\RenderBuffers.hpp" />
     <ClInclude Include="Renderer\Pipeline\RenderState.hpp" />
     <ClInclude Include="Renderer\Pipeline\Shader.hpp" />
@@ -199,6 +200,7 @@
     <ClCompile Include="Math\Vectors\Vector3.cpp" />
     <ClCompile Include="Math\Vectors\Vector4.cpp" />
     <ClCompile Include="Renderer\Images\Texture.cpp" />
+    <ClCompile Include="Renderer\ImmediateRenderer.cpp" />
     <ClCompile Include="Renderer\Pipeline\RenderBuffers.cpp" />
     <ClCompile Include="Renderer\Pipeline\RenderState.cpp" />
     <ClCompile Include="Renderer\Pipeline\Shader.cpp" />

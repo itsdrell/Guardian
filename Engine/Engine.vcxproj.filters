@@ -30,6 +30,7 @@
     <ClInclude Include="Renderer\Pipeline\RenderState.hpp" />
     <ClInclude Include="Renderer\Pipeline\RenderBuffers.hpp" />
     <ClInclude Include="Renderer\RenderTypes.hpp" />
+    <ClInclude Include="Renderer\ImmediateRenderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Platform\Window.cpp">
@@ -96,6 +97,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\RenderTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\ImmediateRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

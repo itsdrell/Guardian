@@ -5,67 +5,13 @@
 #include "Engine/Math/Vectors/Vector2.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Core/General/Camera.hpp"
+#include "Engine/Renderer/ImmediateRenderer.hpp"
 
 static float depthPos = -4.5f;
 static float totalTime = 0.f;
 
 //===============================================================================================
 Game* g_theGame = nullptr;
-//===============================================================================================
-std::vector<VertexMaster> vertices =
-{
-	VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-	VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-	VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-	VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-
-	VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-	VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-	VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-	VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-
-	VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-	VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-	VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-	VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-
-	VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-	VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-	VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-	VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-
-	VertexMaster(Vector3(-1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-	VertexMaster(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-	VertexMaster(Vector3(1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-	VertexMaster(Vector3(-1.0f, 1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-
-	VertexMaster(Vector3(-1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 1.0f)),
-	VertexMaster(Vector3(1.0f, -1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 1.0f)),
-	VertexMaster(Vector3(1.0f, 1.0f, 1.0f),			Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.0f, 0.0f)),
-	VertexMaster(Vector3(-1.0f, 1.0f, 1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(1.0f, 0.0f)),
-};
-
-std::vector<uint16> indices =
-{
-	3,1,0,
-	2,1,3,
-
-	6,4,5,
-	7,4,6,
-
-	11,9,8,
-	10,9,11,
-
-	14,12,13,
-	15,12,14,
-
-	19,17,16,
-	18,17,19,
-
-	22,20,21,
-	23,20,22
-};
-
 //===============================================================================================
 Game::Game()
 {
@@ -85,20 +31,6 @@ Game::~Game()
 void Game::StartUp()
 {
 	Window* theWindow = Window::GetInstance();
-
-	//-----------------------------------------------------------------------------------------------
-	// Create the vertex buffer
-	//Vertex vertices[] =
-	//{
-	//	Vertex(Vector3(-1.0f,  1.0f, -1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//	Vertex(Vector3(1.0f,  1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//	Vertex(Vector3(1.0f,  1.0f,  1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//	Vertex(Vector3(-1.0f,  1.0f,  1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//	Vertex(Vector3(-1.0f, -1.0f, -1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//	Vertex(Vector3(1.0f, -1.0f, -1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//	Vertex(Vector3(1.0f, -1.0f,  1.0f),		Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//	Vertex(Vector3(-1.0f, -1.0f,  1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f) , Vector2(0.f, 0.f)),
-	//};
 
 	Vector3 eye = Vector3(0.f, 1.0f, -5.0f);
 	Vector3 targetPos = Vector3(0.0f, 1.0f, 0.0f);
@@ -139,9 +71,9 @@ void Game::Render() const
 	r->SetCamera(m_camera);
 
 	r->SetModel(m_bigCubeModel);
-	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, (uint) vertices.size(), vertices.data(), (uint) indices.size(), indices.data());
-														
+	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(2.f, 2.f, 2.f));
+
 	// second cube
 	r->SetModel(m_smallCubeModel);
-	r->DrawMeshImmediate(PRIMITIVE_TRIANGLES, (uint) vertices.size(), vertices.data(), (uint) indices.size(), indices.data());
+	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f));
 }
