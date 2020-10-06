@@ -75,8 +75,14 @@ void Game::Render() const
 	r->SetActiveShader(r->m_wireFrameShader);
 	r->SetModel(Matrix44());
 	g_draw->Cube(Vector3(-3.f, 0.f, -1.f), Vector3(1.f, 1.f, 1.f), r->m_defaultTexture, Rgba::WHITE);
+	
+	Matrix44 sphereModel = Matrix44::MakeTranslation3D(Vector3(3.f, 0.f, -1.f));
+	sphereModel.Append(m_bigCubeModel);
+	r->SetModel(sphereModel);
+	g_draw->Sphere(Vector3(0.f, 0.f, 0.f), 1.f, Rgba::BLUE);
 
 	// second cube
+	r->SetActiveShader(r->m_testShader);
 	r->SetModel(m_smallCubeModel);
 	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), r->m_defaultTexture, Rgba::YELLOW);
 }

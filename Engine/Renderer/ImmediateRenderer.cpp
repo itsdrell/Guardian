@@ -2,6 +2,8 @@
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Math/Vectors/Vector2.hpp"
 #include "Engine/Math/Vectors/Vector3.hpp"
+#include "Engine/Math/Vectors/IntVector2.hpp"
+#include "Engine/Math/MathUtils.hpp"
 
 //===============================================================================================
 ImmediateRenderer* g_draw = nullptr;
@@ -88,5 +90,55 @@ void ImmediateRenderer::Cube(const Vector3& center, const Vector3& dimensions, T
 	};
 
 	m_renderer->DrawMeshImmediate(PRIMITIVE_TRIANGLES, (uint) vertices.size(), vertices.data(), (uint) indices.size(), indices.data());
+}
+
+//-----------------------------------------------------------------------------------------------
+void ImmediateRenderer::Sphere(const Vector3& position, float radius /*= 1.f*/, Rgba theColor /*= Rgba::WHITE*/, uint wedges /*= 8*/, uint slices /*= 8*/)
+{
+	std::vector<VertexMaster> vertices;
+	std::vector<uint16> indicies;
+
+	Vector4 colorAsVector4 = theColor.GetAsNormalizedVector4();
+	
+	for (uint slice_idx = 0; slice_idx <= slices; ++slice_idx)
+	{
+
+		float v = (float)slice_idx / ((float)slices);
+		float azimuth = RangeMapFloat(v, 0, 1, -90, 90);
+
+		for (uint wedge_idx = 0; wedge_idx <= wedges; ++wedge_idx)
+		{
+
+			float u = (float)wedge_idx / ((float)wedges);
+			float rot = 360 * u;
+
+			Vector2 uvs = Vector2(u, v);
+			Vector3 pos = position + PolarToCartesian(radius, rot, azimuth);
+
+			vertices.push_back(VertexMaster(pos, colorAsVector4, uvs));
+		}
+	}
+
+	for (uint slice_idx = 0; slice_idx < slices; ++slice_idx) //y
+	{
+		for (uint wedge_idx = 0; wedge_idx < wedges; ++wedge_idx) //x
+		{
+
+			uint16 bl_idx = ((wedges + 1) * slice_idx) + wedge_idx;
+			uint16 tl_idx = bl_idx + wedges + 1; //bl_idx + wedges; 
+			uint16 br_idx = bl_idx + 1;
+			uint16 tr_idx = tl_idx + 1;
+
+			indicies.emplace_back(bl_idx);
+			indicies.emplace_back(br_idx);
+			indicies.emplace_back(tr_idx);
+
+			indicies.emplace_back(bl_idx);
+			indicies.emplace_back(tr_idx);
+			indicies.emplace_back(tl_idx);
+		}
+	}
+
+	m_renderer->DrawMeshImmediate(PRIMITIVE_TRIANGLES, (uint)vertices.size(), vertices.data(), (uint)indicies.size(), indicies.data());
 }
 

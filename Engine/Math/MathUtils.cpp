@@ -1,5 +1,6 @@
 #include "MathUtils.hpp"
 #include "Engine/Math/Vectors/Vector2.hpp"
+#include "Engine/Math/Vectors/Vector3.hpp"
 #include <stdlib.h>
 #include <cmath>
 
@@ -158,4 +159,33 @@ float GetDistanceSquared(const Vector2& a, const Vector2& b)
 	// (b.x - a.x)2 + (b.y - a.y)2
 	return ((b.x - a.x) * (b.x - a.x))
 		+ ((b.y - a.y) * (b.y - a.y));
+}
+
+//-----------------------------------------------------------------------------------------------
+Vector3 PolarToCartesian(float radius, float rotation, float azimuth)
+{
+	return PolarToCartesian(Vector3(radius, rotation, azimuth));
+}
+
+//-----------------------------------------------------------------------------------------------
+Vector3 PolarToCartesian(const Vector3& spherical)
+{
+	// Math reference
+	// Azimus is vertical movement (also called phi)
+	// Rot is horizontal movement (called theta)
+	// x = rcos(phi) * cos(theta)
+	// y = sin(phi)
+	// z = rcos(phi) * sin(theta)
+
+	// just to make it cleaner
+	float radius = spherical.x;
+	float rotation = spherical.y;
+	float azimuth = spherical.z;
+
+	Vector3 result;
+	result.x = radius * CosDegrees(rotation) * CosDegrees(azimuth);
+	result.y = radius * SinDegrees(azimuth);
+	result.z = radius * CosDegrees(azimuth) * SinDegrees(rotation);
+
+	return result;
 }
