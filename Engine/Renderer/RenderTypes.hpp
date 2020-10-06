@@ -10,6 +10,8 @@
 //====================================================================================
 enum D3D11_CULL_MODE;
 enum D3D11_FILL_MODE;
+enum D3D11_BLEND;
+enum D3D11_BLEND_OP;
 
 //====================================================================================
 // Type Defs + Defines
@@ -43,6 +45,39 @@ enum eFillMode
 	FILLMODE_WIRE           // D3D11_FILL_WIREFRAME
 };
 D3D11_FILL_MODE ToDx11FillMode(eFillMode mode);
+
+//-----------------------------------------------------------------------------------------------
+enum eBlendOperation
+{
+	COMPARE_ADD,					// D3D11_BLEND_OP_ADD
+	COMPARE_SUBTRACT,				// D3D11_BLEND_OP_SUBTRACT
+	COMPARE_REVERSE_SUBTRACT,		// D3D11_BLEND_OP_REV_SUBTRACT
+	COMPARE_MIN,					// D3D11_BLEND_OP_MIN
+	COMPARE_MAX						// D3D11_BLEND_OP_MAX
+};
+enum D3D11_BLEND_OP ToDx11BlendOperation(eBlendOperation operation);
+
+//-----------------------------------------------------------------------------------------------
+enum eBlendFactor
+{
+	BLEND_ZERO,						   //D3D11_BLEND_ZERO,
+	BLEND_ONE,						   //D3D11_BLEND_ONE,
+	BLEND_SRC_COLOR,				   //D3D11_BLEND_SRC_COLOR,
+	BLEND_ONE_MINUS_SRC_COLOR,		   //D3D11_BLEND_INV_SRC_COLOR,
+	BLEND_DST_COLOR,				   //D3D11_BLEND_DEST_COLOR,
+	BLEND_ONE_MINUS_DST_COLOR,		   //D3D11_BLEND_INV_DEST_COLOR,
+	BLEND_SRC_ALPHA,				   //D3D11_BLEND_SRC_ALPHA,
+	BLEND_ONE_MINUS_SRC_ALPHA,		   //D3D11_BLEND_INV_SRC_ALPHA,
+	BLEND_DST_ALPHA,				   //D3D11_BLEND_DEST_ALPHA,
+	BLEND_ONE_MINUS_DST_ALPHA,		   //D3D11_BLEND_INV_DEST_ALPHA,
+	BLEND_SRC_ALPHA_SATURATE		   //D3D11_BLEND_SRC_ALPHA_SAT
+	//BLEND_CONSTANT_COLOR,					//GL_CONSTANT_COLOR,
+	//BLEND_ONE_MINUS_CONSTANT_COLOR,		//GL_ONE_MINUS_CONSTANT_COLOR,
+	//BLEND_CONSTANT_ALPHA,					//GL_CONSTANT_ALPHA,
+	//BLEND_ONE_MINUS_CONSTANT_ALPHA,		//GL_ONE_MINUS_CONSTANT_ALPHA,
+
+};
+D3D11_BLEND ToDx11BlendFactor(eBlendFactor factor);
 
 //-----------------------------------------------------------------------------------------------
 enum RENDER_CONSTANT_BUFFER_SLOTS
