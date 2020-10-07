@@ -4,6 +4,7 @@
 #include "Engine/Math/Vectors/Vector3.hpp"
 #include "Engine/Math/Vectors/IntVector2.hpp"
 #include "Engine/Math/MathUtils.hpp"
+#include "Engine/Math/Matrices/Matrix44.hpp"
 
 //===============================================================================================
 ImmediateRenderer* g_draw = nullptr;
@@ -19,6 +20,68 @@ Rect::Rect(Vector2 start, Vector2 end)
 ImmediateRenderer::ImmediateRenderer(Renderer* theRenderer)
 {
 	m_renderer = theRenderer;
+}
+
+//-----------------------------------------------------------------------------------------------
+void ImmediateRenderer::Point3D(const Vector3& position, const Rgba& color /*= Rgba::WHITE*/, float scale)
+{
+	m_renderer->SetActiveTexture(0, m_renderer->m_defaultTexture);
+
+	// this is how you get like a pixel point but its so small
+	//std::vector<VertexMaster> vertices = { VertexMaster(position, color.GetAsNormalizedVector4(), Vector2(0.f, 1.f)) };
+	//m_renderer->DrawMeshImmediate(PRIMITIVE_POINTS, 1, vertices.data(), 0, nullptr);
+
+	// this draws a star at a point
+	Vector3 north = position + (Vector3::UP * scale);
+	Vector3 south = position - (Vector3::UP * scale);
+	Vector3 east = position + (Vector3::RIGHT * scale);
+	Vector3 west = position - (Vector3::RIGHT * scale);
+
+	Vector3 forward = position + (Vector3::FORWARD * scale);
+	Vector3 backward = position - (Vector3::FORWARD * scale);
+
+	Vector3 ne = position + ((Vector3::UP + Vector3::RIGHT) * scale);
+	Vector3 nw = position + ((Vector3::UP + Vector3::LEFT) * scale);
+	Vector3 se = position + ((Vector3::DOWN + Vector3::RIGHT) * scale);
+	Vector3 sw = position + ((Vector3::DOWN + Vector3::LEFT) * scale);
+
+	Line3D(north, south, 1.f, color);
+	Line3D(east, west, 1.f, color);
+	Line3D(ne, sw, 1.f, color);
+	Line3D(nw, se, 1.f, color);
+	Line3D(forward, backward, 1.f, color);
+}
+
+//-----------------------------------------------------------------------------------------------
+void ImmediateRenderer::Line3D(const Vector3& start, const Vector3& end, float thickness, const Rgba& color /*= Rgba::WHITE*/)
+{
+	UNUSED(thickness); // we might use it later but the lines look fine as is
+	
+	m_renderer->SetActiveTexture(0, m_renderer->m_defaultTexture);
+
+	std::vector<VertexMaster> vertices = 
+	{ 
+		VertexMaster(start, color.GetAsNormalizedVector4(), Vector2(0.f, 0.f)),
+		VertexMaster(end, color.GetAsNormalizedVector4(), Vector2(0.f, 0.f))
+	};
+
+	m_renderer->DrawMeshImmediate(PRIMITIVE_LINES, 2, vertices.data(), 0, nullptr);
+}
+
+//-----------------------------------------------------------------------------------------------
+void ImmediateRenderer::Basis(const Matrix44& basis, float lengthOfLine, float lineThickness)
+{
+	m_renderer->SetActiveTexture(0, m_renderer->m_defaultTexture);
+
+	Vector3 position = basis.GetPosition();
+
+	Vector3 x = position + (basis.GetRight() * lengthOfLine);
+	Vector3 y = position + (basis.GetUp() * lengthOfLine);
+	Vector3 z = position + (basis.GetForward() * lengthOfLine);
+
+	Line3D(position, x, lineThickness, Rgba::RED);
+	Line3D(position, y, lineThickness, Rgba::YELLOW);
+	Line3D(position, z, lineThickness, Rgba::BLUE);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -124,8 +187,8 @@ void ImmediateRenderer::Sphere(const Vector3& position, float radius /*= 1.f*/, 
 		for (uint wedge_idx = 0; wedge_idx < wedges; ++wedge_idx) //x
 		{
 
-			uint16 bl_idx = ((wedges + 1) * slice_idx) + wedge_idx;
-			uint16 tl_idx = bl_idx + wedges + 1; //bl_idx + wedges; 
+			uint16 bl_idx = (uint16)(((wedges + 1) * slice_idx) + wedge_idx);
+			uint16 tl_idx = (uint16) (bl_idx + wedges + 1); //bl_idx + wedges; 
 			uint16 br_idx = bl_idx + 1;
 			uint16 tr_idx = tl_idx + 1;
 

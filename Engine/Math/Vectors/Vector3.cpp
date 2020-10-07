@@ -54,6 +54,16 @@ const Vector3 Vector3::operator-(const Vector3& vecToSubtract) const
 }
 
 //-----------------------------------------------------------------------------------------------
+const Vector3 Vector3::operator*(float uniformScale) const
+{
+	float xx = x * uniformScale;
+	float yy = y * uniformScale;
+	float zz = z * uniformScale;
+
+	return Vector3(xx, yy, zz);
+}
+
+//-----------------------------------------------------------------------------------------------
 Vector3 Normalize(const Vector3& vectorToNormalize)
 {
 	//First we need to find the distance

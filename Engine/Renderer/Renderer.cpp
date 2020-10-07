@@ -332,15 +332,8 @@ void Renderer::UpdateConstantBuffer(const ConstantBuffer* buffer, void* data)
 }
 
 //-----------------------------------------------------------------------------------------------
-// Requires indicies 
 void Renderer::DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMaster* vertices, uint indexCount, Indices* indicies)
 {
-	if(indicies == nullptr)
-	{
-		TODO("ERROR check here pls")
-		return;
-	}
-	
 	SetPrimitiveType(type);
 
 	// maybe bind current shader and current texture?
@@ -366,6 +359,9 @@ void Renderer::DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMa
 	SetVertexBuffer(m_tempImmediateVertexBuffer);
 	SetIndexBuffer(m_tempImmediateIndexBuffer);
 
-	m_deviceImmediateContext->DrawIndexed(indexCount, 0, 0);
+	if (indicies == nullptr)
+		m_deviceImmediateContext->Draw(vertexCount, 0);
+	else
+		m_deviceImmediateContext->DrawIndexed(indexCount, 0, 0);
 }
 

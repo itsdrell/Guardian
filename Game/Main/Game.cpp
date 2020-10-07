@@ -84,5 +84,9 @@ void Game::Render() const
 	// second cube
 	r->SetActiveShader(r->m_testShader);
 	r->SetModel(m_smallCubeModel);
-	g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), r->m_defaultTexture, Rgba::YELLOW);
+	//g_draw->Cube(Vector3(0.f, 0.f, 0.f), Vector3(1.f, 1.f, 1.f), r->m_defaultTexture, Rgba::YELLOW);
+
+	r->SetModel(Matrix44());
+	g_draw->Point3D(Vector3(-2.f, 2.f, -1.f), Rgba::BLUE);
+	g_draw->Basis(m_bigCubeModel, 2.f, 1.f);
 }

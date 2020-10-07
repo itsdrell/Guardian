@@ -184,6 +184,30 @@ void Matrix44::Transpose()
 }
 
 //-----------------------------------------------------------------------------------------------
+Vector3 Matrix44::GetForward() const
+{
+	return Vector3(Kx, Ky, Kz);
+}
+
+//-----------------------------------------------------------------------------------------------
+Vector3 Matrix44::GetRight() const
+{
+	return Vector3(Ix, Iy, Iz);
+}
+
+//-----------------------------------------------------------------------------------------------
+Vector3 Matrix44::GetUp() const
+{
+	return Vector3(Jx, Jy, Jz);
+}
+
+//-----------------------------------------------------------------------------------------------
+Vector3 Matrix44::GetPosition() const
+{
+	return Vector3(Tx, Ty, Tz);
+}
+
+//-----------------------------------------------------------------------------------------------
 Matrix44 Matrix44::MakeRotationDegreesAroundZ(float rotationDegrees)
 {
 	return MakeRotationDegrees2D(rotationDegrees);

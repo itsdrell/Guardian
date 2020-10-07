@@ -44,6 +44,12 @@ public:
 	void Transpose();
 
 public:
+	Vector3 GetForward() const;
+	Vector3 GetRight() const;
+	Vector3 GetUp() const;
+	Vector3 GetPosition() const;
+
+public:
 	static Matrix44 MakeRotationDegreesAroundZ(float rotationDegrees);
 	static Matrix44 MakeRotationDegreesAroundY(float rotationDegrees);
 	static Matrix44 MakeRotationDegreesAroundX(float rotationDegrees);

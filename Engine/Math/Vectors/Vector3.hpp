@@ -35,6 +35,7 @@ public:
 public:
 	const Vector3 operator+(const Vector3& vecToAdd) const;
 	const Vector3 operator-(const Vector3& vecToSubtract) const;
+	const Vector3 operator*(float uniformScale) const;
 
 public:
 	float x,y,z = 0.f;
