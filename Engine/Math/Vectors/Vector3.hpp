@@ -37,6 +37,8 @@ public:
 	const Vector3 operator-(const Vector3& vecToSubtract) const;
 	const Vector3 operator*(float uniformScale) const;
 
+	Vector3 operator-() const { return Vector3(-x, -y, -z); }
+
 public:
 	float x,y,z = 0.f;
 

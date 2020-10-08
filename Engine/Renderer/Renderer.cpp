@@ -13,6 +13,7 @@
 #include "Engine/Renderer/Pipeline/RenderBuffers.hpp"
 #include "Engine/Core/General/Camera.hpp"
 #include "Engine/Core/General/Rgba.hpp"
+#include "Engine/Math/Geometry/AABB2.hpp"
 
 //===============================================================================================
 Renderer* Renderer::s_renderer = nullptr;
@@ -62,6 +63,9 @@ Renderer::~Renderer()
 
 	delete m_cameraConstantBuffer;
 	m_cameraConstantBuffer = nullptr;
+
+	delete m_defaultUICamera;
+	m_defaultUICamera = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -222,6 +226,10 @@ void Renderer::PostStartup()
 	
 	ModelBufferData mb;
 	m_modelConstantBuffer = new ConstantBuffer(1, sizeof(ModelBufferData), &mb);
+
+	AABB2 uiCameraBounds = AABB2(Vector2(0.f, 0.f), Vector2(Window::GetInstance()->GetAspect(), 1));
+	m_defaultUICamera = new Camera();
+	m_defaultUICamera->m_projectionMatrix = Matrix44::MakeOrtho2D(uiCameraBounds.mins, uiCameraBounds.maxs);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -354,10 +362,13 @@ void Renderer::DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMa
 	}
 
 	m_tempImmediateVertexBuffer = new VertexBuffer(vertexCount, sizeof(VertexMaster), vertices);
-	m_tempImmediateIndexBuffer = new IndexBuffer(indexCount, sizeof(uint), indicies);
-
 	SetVertexBuffer(m_tempImmediateVertexBuffer);
-	SetIndexBuffer(m_tempImmediateIndexBuffer);
+
+	if(indicies != nullptr)
+	{
+		m_tempImmediateIndexBuffer = new IndexBuffer(indexCount, sizeof(uint16), indicies);
+		SetIndexBuffer(m_tempImmediateIndexBuffer);
+	}
 
 	if (indicies == nullptr)
 		m_deviceImmediateContext->Draw(vertexCount, 0);

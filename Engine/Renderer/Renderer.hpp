@@ -78,7 +78,7 @@ public:
 	void UpdateConstantBuffer(const ConstantBuffer* buffer, void* data);
 
 public:
-	void DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMaster* vertices, uint indexCount, Indices* indicies);
+	void DrawMeshImmediate(ePrimitiveType type, uint vertexCount, VertexMaster* vertices, uint indexCount = 0U, Indices* indicies = nullptr);
 
 private:
 	void BindCameraToShader(const Camera& theCamera);
@@ -117,6 +117,7 @@ public:
 	Shader*					m_wireFrameShader = nullptr;
 
 	Camera*					m_currentCamera = nullptr;
+	Camera*					m_defaultUICamera = nullptr;
 
 	// these need the device interface/context
 	friend class Texture;
